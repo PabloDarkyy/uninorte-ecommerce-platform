@@ -1,0 +1,35 @@
+:root {
+  --background: #f5f3eb;
+  --surface: #fffef9;
+  --text: #22362c;
+  --text-muted: #6d7369;
+  --green-dark: #244b38;
+  --green-leaf: #748d54;
+  --earth: #8f6a49;
+  --honey: #bc9349;
+  --border: #dfE3d6;
+  --glass-bg: rgb(255 254 249 / 56%);
+  --glass-bg-strong: rgb(255 254 249 / 76%);
+  --glass-border: rgb(255 255 255 / 88%);
+  --glass-highlight: rgb(255 255 255 / 72%);
+  --glass-blur: 16px;
+  --glass-shadow: 0 14px 40px rgb(36 58 44 / 8%), inset 0 1px 0 var(--glass-highlight);
+  --nature-bg: #e4e0d2;
+  --nature-deep: #243a2c;
+  --nature-green: #526b45;
+  --nature-leaf: #75895b;
+  --nature-earth: #765844;
+  --nature-clay: #9a765d;
+  --nature-cream: #f3efe5;
+  --nature-mix: 0%;
+  --ambient-bg: color-mix(in srgb, var(--nature-bg) var(--nature-mix), var(--background));
+  --ambient-green: color-mix(in srgb, var(--nature-green) var(--nature-mix), var(--green-dark));
+  --shadow: 0 16px 45px rgb(39 66 42 / 5%);
+  --radius-sm: 12px;
+  --radius-md: 24px;
+  --radius-lg: 40px;
+  --transition-fast: 160ms ease;
+  --transition-normal: 320ms cubic-bezier(.2,.7,.2,1);
+  --font-body: 'Segoe UI', Arial, sans-serif;
+  --font-display: Georgia, 'Times New Roman', serif;
+}

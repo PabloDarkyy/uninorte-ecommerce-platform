@@ -1,0 +1,3 @@
+import { currencyConfig } from '../../config/currency.js';
+import { escapeHtml as e } from '../../utils/html.js';
+export const currencySelector = ({ id = 'currency', value = 'PYG', disabled = true } = {}) => `<label class="visual-selector"><span class="${disabled ? 'sr-only' : ''}">${disabled ? 'Moneda (vista previa, no disponible)' : 'Moneda preferida'}</span><select id="${e(id)}" name="currency" ${disabled ? 'disabled' : ''}>${Object.keys(currencyConfig.rates).map(currency => `<option value="${currency}" ${value === currency ? 'selected' : ''}>${currency}</option>`).join('')}</select></label>`;

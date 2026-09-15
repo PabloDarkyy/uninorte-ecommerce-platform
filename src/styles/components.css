@@ -1,0 +1,36 @@
+.navbar { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; padding-block: 1rem; }
+.brand { display: flex; gap: .6rem; align-items: center; font-weight: 700; font-size: 1.15rem; text-decoration: none; }
+.logo { border: 1px solid var(--accent); padding: .25rem .4rem; font-size: .9rem; }
+.nav-content { display: flex; flex: 1; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 1rem; }
+.nav-content nav,.nav-tools { display: flex; flex-wrap: wrap; gap: .8rem; align-items: center; }
+.nav-content a { font-size: .9rem; padding-block: .4rem; }
+.nav-tools label { margin: 0; font-size: .875rem; }
+.nav-tools select { padding: .25rem; }
+[aria-current="page"] { font-weight: 700; text-decoration-thickness: .18em; }
+.menu-toggle { display: none; margin-left: auto; }
+.demo-banner { background: #e9ecee; border-block: 1px solid var(--border); font-size: .875rem; padding-block: .65rem; }
+.panel { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; border-radius: .25rem; }
+.placeholder { display: grid; place-items: center; text-align: center; padding: 1rem; color: var(--muted); background: #eff0f1; border: 1px dashed #8b949b; }
+.viewer { min-height: 300px; }
+.image-placeholder { min-height: 140px; border-width: 0 0 1px; }
+.product-card { border: 1px solid var(--border); border-radius: .25rem; background: var(--surface); overflow: hidden; display: flex; flex-direction: column; }
+.card-body { padding: 1.25rem; display: flex; flex-direction: column; flex: 1; }
+.card-body h3 { margin-top: .5rem; }
+.card-body .button { margin-top: auto; }
+.secondary { background: white; color: var(--accent); }
+.eyebrow { color: var(--muted); text-transform: uppercase; letter-spacing: .1em; font-size: .875rem; }
+.actions { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; margin-block: 1rem; }
+.price { font-size: 1.25rem; font-weight: 600; }
+.admin-nav { display: grid; gap: 1rem; }
+table { border-collapse: collapse; width: 100%; text-align: left; background: white; }
+caption { text-align: left; padding: 1rem; font-weight: 600; }
+th,td { padding: 1rem; border-bottom: 1px solid var(--border); }
+thead { background: #f0f1f2; }
+@media (max-width: 900px) {
+  .menu-toggle { display: block; }
+  .nav-content { display: none; flex-basis: 100%; align-items: stretch; }
+  .nav-content.is-open { display: flex; }
+  .nav-content nav,.nav-tools { width: 100%; }
+  .nav-content nav { display: grid; grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 620px) { .viewer { min-height: 240px; } .panel { padding: 1rem; } }

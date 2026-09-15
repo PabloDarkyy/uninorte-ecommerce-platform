@@ -1,0 +1,18 @@
+// Datos académicos: precios, stock y presentaciones de ejemplo, sin valor comercial.
+const entries = [
+  ['mani', 'Maní', 'Peanuts', 'Alimentos', 'Food', '#A36B43'],
+  ['miel', 'Miel de abeja', 'Bee honey', 'Alimentos', 'Food', '#C89535'],
+  ['harina', 'Harina de trigo', 'Wheat flour', 'Alimentos', 'Food', '#C0A77A'],
+  ['petitgrain', 'Esencia de petitgrain', 'Petitgrain essence', 'Esencias', 'Essences', '#719B65', './src/assets/models/YUYO2.glb', true],
+  ['licor', 'Licor de mandioca', 'Cassava liqueur', 'Bebidas', 'Drinks', '#AF7545', './src/assets/models/licor-mandioca.glb', true],
+  ['yuyo', 'Mix de yuyo', 'Herbal mix', 'Hierbas', 'Herbs', '#70864B', './src/assets/models/YUYO2.glb', true],
+];
+export const products = entries.map(([id, es, en, categoryEs, categoryEn, accentColor, model = null, heroFeatured = false], index) => ({
+  id, slug: id, name: { es, en }, category: { es: categoryEs, en: categoryEn },
+  shortDescription: { es: 'Una propuesta de los grupos de UniNorte. La descripción y presentación final serán proporcionadas por el equipo responsable.', en: 'A proposal from the UniNorte student groups. Final details will be provided by the responsible team.' },
+  description: { es: 'Descripción pendiente del grupo responsable.', en: 'Description pending from the responsible group.' },
+  basePrice: 10000, baseCurrency: 'PYG', stock: 10,
+  image: null, model, accentColor, heroFeatured,
+  variants: [{ id: 'demo', name: { es: 'Presentación de ejemplo', en: 'Sample option' } }],
+  brand: { es: 'Empresa por confirmar', en: 'Company to be confirmed' }, featured: index < 3,
+}));

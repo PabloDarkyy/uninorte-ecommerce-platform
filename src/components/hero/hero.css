@@ -1,0 +1,29 @@
+.hero { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 30px; min-height: 635px; padding: 38px 12px 48px; }
+.hero-copy { position: relative; z-index: 1; padding: 10px 10px 10px 15px; opacity: var(--hero-copy-opacity, 1); transform: translateY(var(--hero-copy-shift, 0px)); }
+.hero .eyebrow { margin-bottom: 25px; }
+.hero .eyebrow > span { width: 7px; height: 7px; background: var(--green-leaf); border-radius: 50%; }
+.hero h1 { font-family: var(--font-display); font-size: clamp(50px, 5.15vw, 73px); font-weight: 400; line-height: 1.035; letter-spacing: -3px; }
+.hero h1 em { color: var(--green-leaf); font-weight: 400; }
+.hero-break { display: none; }
+.hero-description { color: var(--text-muted); max-width: 365px; font-size: 15px; line-height: 1.8; margin-block: 26px; }
+.hero-origin { display: flex; align-items: center; gap: 8px; margin-top: 26px; color: var(--text-muted); font-size: 12px; }
+.hero-origin .icon { width: 17px; height: 17px; color: var(--green-leaf); }
+.hero-exhibit { position: relative; min-width: 0; min-height: 526px; border-radius: 46% 46% var(--radius-lg) var(--radius-lg) / 24% 24% var(--radius-lg) var(--radius-lg); background: radial-gradient(ellipse at 48% 43%, rgb(231 228 198 / 70%), transparent 62%), linear-gradient(145deg, rgb(255 254 249 / 55%), rgb(224 231 211 / 55%)); border: 1px solid var(--glass-border); box-shadow: var(--shadow); }
+.exhibit-topline,.exhibit-bottomline { position: absolute; left: 30px; right: 30px; display: flex; align-items: center; justify-content: space-between; z-index: 2; color: var(--text-muted); }
+.exhibit-topline { top: 42px; font-size: 10px; letter-spacing: 1.5px; }
+.exhibit-bottomline { bottom: 25px; font-family: var(--font-display); font-style: italic; font-size: 16px; }
+.exhibit-seal { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--border); border-radius: 50%; font: 11px var(--font-body); letter-spacing: 1px; }
+.hero-exhibit { backdrop-filter: blur(var(--glass-blur)) saturate(115%); box-shadow: var(--glass-shadow); }
+.hero-exhibit .model-mount,.hero-exhibit .stage-shadow { opacity: var(--hero-model-opacity, 1); }
+.hero-transition { --hero-scroll-distance: 140svh; position: relative; height: calc(var(--hero-visual-height, 100svh) + var(--hero-scroll-distance)); overflow: visible; }
+.hero-sticky { position: sticky; top: var(--hero-sticky-top, 0px); min-height: calc(100svh - var(--hero-header-space, 120px)); overflow: visible; }
+.hero-transition .hero { overflow: visible; }
+.hero-transition .hero-exhibit { opacity: var(--hero-decoration-opacity, 1); }
+.hero-canvas-overlay { position: absolute; z-index: 5; left: var(--hero-overlay-left, 0px); top: var(--hero-overlay-top, 0px); width: var(--hero-viewport-width, 100%); height: var(--hero-viewport-height, 100svh); overflow: clip; pointer-events: none; }
+.hero-canvas-overlay .product-canvas { touch-action: pan-y !important; pointer-events: none; }
+.hero-canvas-overlay .product-canvas.is-ready { opacity: var(--hero-model-opacity, 1); }
+.hero-scroll-debug { position: absolute; z-index: 6; top: calc(var(--hero-overlay-top, 0px) + 115px); right: 8px; padding: 5px 10px; border-radius: 8px; background: var(--glass-bg-strong); color: var(--green-dark); font: 12px monospace; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .hero-transition { --hero-scroll-distance: 35svh; } }
+@media (max-width: 1100px) { .hero { min-height: 570px; gap: 10px; padding-inline: 0; } .hero h1 { font-size: 57px; } .hero-break { display: block; } .hero-exhibit { min-height: 495px; } .exhibit-topline { left: 22px; right: 22px; } }
+@media (max-width: 900px) { .hero h1 { font-size: 49px; letter-spacing: -2px; } .hero-copy { padding-left: 0; } .hero-exhibit { min-height: 470px; } .exhibit-topline { font-size: 9px; letter-spacing: .8px; } .exhibit-bottomline { left: 18px; right: 18px; font-size: 14px; } }
+@media (max-width: 700px) { .hero { grid-template-columns: 1fr; padding: 26px 3px 35px; gap: 30px; } .hero-copy { padding: 0 10px; } .hero h1 { font-size: clamp(45px, 10vw, 64px); } .hero-break { display: none; } .hero .eyebrow { margin-bottom: 20px; font-size: 11px; } .hero-description { max-width: 400px; margin-block: 22px; } .hero-exhibit { min-height: 430px; } .hero-origin { margin-top: 22px; } }

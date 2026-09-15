@@ -1,0 +1,11 @@
+import { e, money, empty } from './shared.js';
+export function charts(snapshot) {
+  const max = Math.max(1, ...snapshot.salesByProduct.map(r => r.units));
+  const periods = snapshot.salesByPeriod;
+  const peak = Math.max(1, ...periods.map(r => r.units));
+  const points = periods.map((p, i) => `${35 + i * 88},${155 - p.units / peak * 115}`).join(' ');
+  return `<div class="admin-chart-grid"><article class="admin-panel"><p class="eyebrow">LA COLECCIÓN EN CIFRAS</p><h2>Ventas por producto</h2><p class="admin-muted">Unidades simuladas durante el mes</p><div class="admin-bars">${snapshot.salesByProduct.map(r => `<div class="admin-bar-row"><div><span>${e(r.name)}</span><strong>${r.units}</strong></div><div class="admin-bar-track"><span style="--bar-size:${r.units / max}"></span></div></div>`).join('') || empty('Crea un producto para ver las ventas.')}</div></article><article class="admin-panel"><p class="eyebrow">RITMO DEL MES</p><h2>Ventas recientes</h2><p class="admin-muted">Seis periodos del mismo conjunto de ventas</p><svg class="admin-line" viewBox="0 0 520 195" role="img" aria-label="Ventas recientes: ${e(periods.map(p => `${p.label}: ${p.units} unidades`).join(', '))}"><path d="M35 40H485 M35 98H485 M35 155H485" class="chart-grid"/><polygon points="35,155 ${points} 475,155" class="chart-area"/><polyline points="${points}" class="chart-line"/>${periods.map((p, i) => `<circle cx="${35 + i * 88}" cy="${155 - p.units / peak * 115}" r="4"/><text x="${35 + i * 88}" y="${140 - p.units / peak * 115}">${p.units}</text><text x="${35 + i * 88}" y="183">P${i + 1}</text>`).join('')}</svg><details><summary>Ver datos del gráfico</summary><ul>${periods.map(p => `<li>${e(p.label)}: ${p.units} unidades</li>`).join('')}</ul></details></article></div>`;
+}
+export function topProducts(snapshot) {
+  return `<article class="admin-panel"><p class="eyebrow">PREFERIDOS DEL MES</p><h2>Productos más vendidos</h2><ol class="admin-ranking">${snapshot.topProducts.map(r => `<li><div><strong>${e(r.name)}</strong><small>${r.units} unidades · ${e(money(r.unitPrice, r.currency))} por unidad</small></div><strong>${e(money(r.revenue, r.currency))}</strong></li>`).join('')}</ol>${snapshot.topProducts.length ? '' : empty('Aún no hay productos activos.')}</article>`;
+}

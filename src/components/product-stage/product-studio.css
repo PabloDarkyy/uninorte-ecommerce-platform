@@ -1,0 +1,50 @@
+/* Escenario compartido: solo fondos, sin capas sobre el canvas ni cambios de encuadre. */
+:is(.hero-exhibit:has(.has-model), .modal-visual:has(.has-model), .expanded-viewer) {
+  --studio-center-x: 54%;
+  --studio-center-y: 43%;
+  --studio-floor-y: 80%;
+  --studio-shadow-width: 25%;
+  --studio-shadow-height: 5%;
+  --studio-sage: color-mix(in srgb, var(--nature-green) 40%, var(--nature-cream));
+  --studio-earth: color-mix(in srgb, var(--nature-earth) 18%, var(--nature-cream));
+  --studio-shadow: color-mix(in srgb, var(--nature-deep) 18%, transparent);
+  background:
+    radial-gradient(ellipse var(--studio-shadow-width) var(--studio-shadow-height) at 50% var(--studio-floor-y), var(--studio-shadow), transparent 100%),
+    radial-gradient(ellipse 60% 68% at 13% 12%, color-mix(in srgb, var(--surface) 88%, transparent), transparent 100%),
+    radial-gradient(ellipse 56% 62% at var(--studio-center-x) var(--studio-center-y), var(--studio-sage), transparent 100%),
+    radial-gradient(ellipse 75% 55% at 100% 88%, var(--studio-earth), transparent 100%),
+    linear-gradient(145deg, var(--nature-cream), var(--background) 60%, var(--nature-bg));
+}
+
+.hero-exhibit:has(.has-model) {
+  --studio-center-y: 39%;
+  --studio-floor-y: 76%;
+  --studio-shadow-width: 23%;
+  box-shadow: inset 0 1px 0 var(--glass-highlight), 0 18px 48px rgb(36 58 44 / 9%);
+}
+
+.modal-visual:has(.has-model) {
+  --studio-center-y: 34%;
+  --studio-floor-y: 84%;
+  --studio-shadow-width: 19%;
+  --studio-shadow-height: 7%;
+}
+
+.expanded-viewer {
+  --studio-center-y: 45%;
+  --studio-floor-y: 79%;
+  --studio-shadow-width: 22%;
+  --studio-shadow-height: 4%;
+}
+
+/* Sustituye los discos definidos por iluminación difusa, solo en los visores 3D. */
+:is(.hero-exhibit, .modal-visual) .has-model :is(.stage-halo, .stage-orbit, .stage-shadow) { opacity: 0; }
+.hero-exhibit .has-model .stage-leaf { opacity: 0.28; }
+
+@media (max-width: 700px) {
+  .expanded-viewer {
+    --studio-shadow-width: 31%;
+    --studio-floor-y: 75%;
+    --studio-center-x: 52%;
+  }
+}

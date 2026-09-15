@@ -1,0 +1,4 @@
+import { icon } from '../../utils/icons.js';
+export function renderFooter(root) {
+  root.innerHTML = `<div class="shell footer-grid"><div class="footer-brand-block" id="about" tabindex="-1"><a class="brand" href="#/home"><span class="brand-mark">un<span>·</span></span><span>UniNorte<small>TIERRA & ORIGEN</small></span></a><p>Un proyecto universitario para acercar<br>lo nuestro a nuevos horizontes.</p></div><nav aria-label="Navegación del pie"><h2>Explora</h2><a href="#/home">Inicio</a><a href="#/catalog">Nuestros productos</a><a href="#/about">Nosotros</a><a href="#/admin">Administración</a></nav><div id="contact" tabindex="-1"><h2>Conectemos</h2><p>Desde Paraguay, para el mundo.</p><span class="footer-contact">Contacto disponible próximamente ${icon('arrow')}</span></div></div><div class="shell footer-bottom"><span>© UniNorte · Proyecto académico</span><span>Hecho con raíces paraguayas ${icon('leaf')}</span></div>`;
+}

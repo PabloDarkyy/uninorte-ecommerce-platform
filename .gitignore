@@ -1,0 +1,25 @@
+# Dependencias y archivos generados locales
+node_modules/
+/.verification/
+/.sites-runtime/
+/dist/
+/build/
+.cache/
+/coverage/
+/test-results/
+/playwright-report/
+
+# Configuración local y secretos (los ejemplos sin credenciales sí se versionan)
+.env
+.env.*
+!.env.example
+
+# Editores, sistema operativo y registros
+.vscode/
+.idea/
+*.log
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# src/vendor/three/build/ es una dependencia de ejecución y DEBE versionarse.

@@ -1,0 +1,98 @@
+const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright');
+const assert = require('node:assert/strict');
+const base = 'http://127.0.0.1:4173';
+(async () => {
+  const browser = await chromium.launch({ headless: true, channel: process.env.BROWSER_CHANNEL || 'msedge' });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, hasTouch: true });
+    const errors = [], models = [];
+    page.on('pageerror', error => errors.push(error.message));
+    page.on('request', request => { if (request.url().endsWith('.glb')) models.push(request.url()); });
+    await page.goto(base);
+    await page.waitForFunction(() => document.querySelector('.hero [data-viewer-state="ready"]'));
+    const catalog = page.locator('#header nav a[href="#/catalog"]');
+    await catalog.click();
+    await page.waitForTimeout(750);
+    const progress = await page.locator('.hero-transition').getAttribute('data-scroll-progress');
+    assert.ok(Number(progress) > 0.1 && Number(progress) < 0.9, 'The cinematic scroll is still visible after 750ms');
+    await catalog.click();
+    await catalog.click();
+    await page.waitForFunction(() => document.activeElement.id === 'catalog');
+    assert.equal(await page.locator('.hero-transition').getAttribute('data-scroll-progress'), '1.000000');
+    await page.locator('#header nav a[href="#/home"]').click();
+    await page.waitForFunction(() => scrollY < 5);
+    await catalog.click();
+    await page.waitForTimeout(250);
+    await page.locator('#header nav a[href="#/contact"]').click();
+    await page.waitForTimeout(2600);
+    assert.equal(await page.evaluate(() => document.activeElement.id), 'contact');
+    await page.locator('#header nav a[href="#/home"]').click();
+    await page.waitForFunction(() => scrollY < 5);
+    await catalog.click();
+    await page.waitForTimeout(300);
+    await page.mouse.wheel(0, -100);
+    await page.waitForTimeout(250);
+    const stopped = await page.evaluate(() => scrollY);
+    await page.waitForTimeout(500);
+    assert.equal(await page.evaluate(() => scrollY), stopped, 'Manual wheel cancels navigation');
+
+    await page.locator('[data-product-preview="licor"]').click();
+    await page.locator('.viewer-expand').waitFor();
+    await page.evaluate(() => window.detailCanvas = document.querySelector('.product-modal canvas'));
+    const requestsBefore = models.length;
+    for (const [width, height] of [[1440,1000], [768,1024], [375,812]]) {
+      await page.setViewportSize({ width, height });
+      await page.waitForTimeout(200);
+      for (let i = 0; i < 2; i++) {
+        const scrollBefore = await page.evaluate(() => scrollY);
+        await page.locator('.viewer-expand').click();
+        const dialog = page.locator('.expanded-viewer');
+        await dialog.waitFor();
+        await page.waitForTimeout(250);
+        assert.ok(await dialog.evaluate(el => el.clientWidth >= el.scrollWidth));
+        const bounds = await dialog.boundingBox();
+        assert.ok(bounds.x >= 0 && bounds.y >= 0 && bounds.x + bounds.width <= width && bounds.y + bounds.height <= height);
+        assert.ok(await page.evaluate(() => detailCanvas === document.querySelector('.expanded-viewer canvas')));
+        assert.equal(await page.locator('canvas').count(), 2);
+        const canvas = page.locator('.expanded-viewer canvas');
+        const box = await canvas.boundingBox();
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+        await page.mouse.down();
+        await page.mouse.move(box.x + box.width / 2 + 70, box.y + box.height / 2 - 100, { steps: 10 });
+        await page.mouse.up();
+        await page.mouse.wheel(0, -200);
+        await page.waitForTimeout(150);
+        if (i === 0) await page.screenshot({ path: `.verification/expanded-${width}.png` });
+        if (i === 0) await page.keyboard.press('Escape');
+        else await page.getByRole('button', { name: 'Cerrar modelo ampliado' }).click();
+        await dialog.waitFor({ state: 'detached' });
+        assert.ok(await page.evaluate(() => detailCanvas === document.querySelector('.product-modal canvas')));
+        assert.ok(await page.locator('.viewer-expand').evaluate(el => el === document.activeElement));
+        assert.ok(await page.locator('.product-modal').evaluate(el => el.open));
+        assert.equal(await page.evaluate(() => scrollY), scrollBefore, 'Expanded interaction and close preserve page scroll');
+      }
+    }
+    assert.equal(models.length, requestsBefore, 'Expanding reuses the GLB without requests');
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.locator('.viewer-expand').click();
+    await page.evaluate(() => location.hash = '#/about');
+    await page.waitForFunction(() => !document.querySelector('dialog'));
+    assert.equal(await page.locator('canvas').count(), 1);
+    assert.equal(await page.evaluate(() => document.documentElement.classList.contains('modal-open')), false);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.locator('#header nav a[href="#/home"]').click();
+    await catalog.click();
+    await page.waitForFunction(() => document.querySelector('#catalog').getBoundingClientRect().top < 150);
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.evaluate(() => { document.querySelector('[data-product-preview]').click(); location.hash = '/contact'; });
+    await page.waitForTimeout(350);
+    assert.equal(await page.locator('dialog').count(), 0, 'Navigation cancels pending card opening within Home');
+    const immediate = await page.evaluate(() => { document.querySelector('[data-product-preview]').click(); return Boolean(document.querySelector('dialog')); });
+    assert.equal(immediate, false, 'The card responds before opening detail');
+    await page.locator('.product-modal[open]').waitFor();
+    await page.keyboard.press('Escape');
+    await page.locator('.product-modal').waitFor({ state: 'detached' });
+    assert.deepEqual(errors, []);
+    console.log('PASS: paced catalog navigation, repeated clicks, rapid navigation/manual cancellation, reduced motion; same canvas and no GLB requests across six expansions, drag/zoom, 3 sizes, Escape/button, focus restoration and route cleanup.');
+  } finally { await browser.close(); }
+})().catch(error => { console.error(error); process.exitCode = 1; });
