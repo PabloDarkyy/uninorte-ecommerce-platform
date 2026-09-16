@@ -1,21 +1,21 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { acquireProductModel } from './product-model-cache.js';
 import { createStudioEnvironment, tuneStudioGlass } from './studio-environment.js';
-import { normalizeModel, disposeObjects } from './three-utils.js';
+import { normalizeModel } from './three-utils.js';
 
 export function createProductViewer({ container, modelUrl, label = 'Producto', autoRotate = true,
-  interactive = true, initialRotation = {}, camera: cameraOptions = {}, lighting = {} }) {
+  interactive = true, initialRotation = {}, camera: cameraOptions = {}, lighting = {}, resources, staticPreview = false, startPaused = false }) {
   const abort = new AbortController();
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const stage = container.closest('.product-stage');
   const oldLabel = container.getAttribute('aria-label');
-  let renderer, controls, environment, scene, camera, tilt, spin, modelScenes = [];
+  let renderer, controls, environment, scene, camera, tilt, spin, modelLease, resourceLease;
   let resizeObserver, visibilityObserver, frame = 0, disposed = false, loaded = false;
   let visible = true, interacting = false, lastInteraction = -Infinity, lastTime = 0;
   let speed = 0, scrollProgress = 0, settleFrames = 0, frameCount = 0, fittedDistance = 4, modelRadius = 1.18;
   let transitionLayout, transitionFrame;
-  let expanded = false, savedCamera;
+  let expanded = false, savedCamera, flight, held = startPaused;
   const presentationCamera = new THREE.PerspectiveCamera();
   const direction = new THREE.Vector3();
   container.dataset.viewerState = 'loading';
@@ -29,14 +29,13 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
     resizeObserver?.disconnect();
     visibilityObserver?.disconnect();
     controls?.dispose();
-    disposeObjects(modelScenes);
-    modelScenes = [];
+    modelLease?.release();
     spin?.clear();
-    environment?.dispose();
+    if (!resourceLease) environment?.dispose();
     scene?.clear();
     renderer?.domElement.remove();
-    renderer?.dispose();
-    renderer?.forceContextLoss();
+    if (resourceLease) resourceLease.release();
+    else { renderer?.dispose(); renderer?.forceContextLoss(); }
     stage?.classList.remove('has-model');
     container.setAttribute('role', 'img');
     container.setAttribute('aria-label', oldLabel || label);
@@ -52,11 +51,12 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
   }
 
   function canRender() {
-    return loaded && !disposed && visible && !document.hidden &&
+    return loaded && !disposed && (staticPreview || visible || flight) && !document.hidden &&
       (!document.documentElement.classList.contains('modal-open') || Boolean(container.closest('dialog[open]')));
   }
 
   function requestRender() {
+    if (staticPreview || held || flight) return;
     if (!frame && canRender()) frame = requestAnimationFrame(render);
   }
 
@@ -67,13 +67,20 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
     if (!canRender()) { lastTime = 0; container.dataset.rendering = 'false'; return; }
     const delta = lastTime ? Math.min((time - lastTime) / 1000, 0.05) : 1 / 60;
     lastTime = time;
-    const locked = transitionFrame?.locked ?? false;
+    const locked = Boolean(flight || held || transitionFrame?.locked);
     const targetSpeed = !locked && autoRotate && !motion.matches && !interacting && time - lastInteraction > 3000 ? 0.16 : 0;
     speed += (targetSpeed - speed) * (1 - Math.exp(-delta * 3));
-    if (locked) { speed = 0; spin.rotation.y = transitionFrame.rotationY; }
+    if (locked) { speed = 0; if (transitionFrame) spin.rotation.y = transitionFrame.rotationY; }
     else { if (!motion.matches) spin.rotation.y += speed * delta; controls.update(delta); }
     let renderCamera = camera;
-    if (transitionLayout && transitionFrame) {
+    if (flight) {
+      presentationCamera.copy(camera);
+      const distanceRatio = (flight.distance ?? camera.position.length()) / camera.position.length();
+      presentationCamera.position.multiplyScalar(distanceRatio);
+      presentationCamera.zoom = flight.targetHeight / flight.height * flight.scale * distanceRatio;
+      presentationCamera.setViewOffset(flight.width, flight.height, flight.width / 2 - flight.x, flight.height / 2 - flight.y, flight.width, flight.height);
+      renderCamera = presentationCamera;
+    } else if (transitionLayout && transitionFrame) {
       const { width, height, origin } = transitionLayout;
       presentationCamera.copy(camera);
       if (locked) { presentationCamera.position.set(0, 0, fittedDistance); presentationCamera.lookAt(0, 0, 0); }
@@ -113,19 +120,22 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
     camera.far = fittedDistance + 30;
     camera.updateProjectionMatrix();
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setSize(transitionLayout?.width ?? width, transitionLayout?.height ?? height, false);
+    if (!flight) renderer.setSize(transitionLayout?.width ?? width, transitionLayout?.height ?? height, false);
     invalidate();
   }
 
   const ready = (async () => {
     try {
-      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
+      resourceLease = resources?.acquire();
+      renderer = resourceLease?.renderer ?? new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
       renderer.setClearColor(0x000000, 0);
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = lighting.exposure ?? 1.15;
       const canvas = renderer.domElement;
       canvas.className = 'product-canvas';
+      canvas.style.cssText = '';
+      canvas.dataset.rendererKind = resources ? 'catalog-shared' : 'standalone';
       canvas.tabIndex = interactive ? 0 : -1;
       canvas.setAttribute('role', 'img');
       canvas.setAttribute('aria-label', `${label}, modelo 3D. Arrastra para girar o usa Mayúsculas y flechas.`);
@@ -133,7 +143,11 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera(cameraOptions.fov ?? 32, 1, 0.01, 50);
       camera.position.set(0, 0.15, fittedDistance);
-      controls = new OrbitControls(camera, canvas);
+      controls = interactive ? new OrbitControls(camera, canvas) : {
+        update() { camera.lookAt(0, 0, 0); }, dispose() {}, addEventListener() {},
+        getDistance() { return camera.position.length(); }, getAzimuthalAngle() { return 0; }, getPolarAngle() { return Math.PI / 2; },
+      };
+      controls.update();
       controls.enabled = interactive;
       controls.enablePan = false;
       controls.enableDamping = true;
@@ -155,22 +169,21 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
         light.position.set(...position);
         scene.add(light);
       });
-      environment = createStudioEnvironment(renderer);
+      environment = resourceLease?.environment ?? createStudioEnvironment(renderer);
       scene.environment = environment.texture;
       scene.environmentIntensity = lighting.environment ?? 0.7;
       tilt = new THREE.Group();
       spin = new THREE.Group();
       tilt.add(spin);
       scene.add(tilt);
-      resizeObserver = new ResizeObserver(resize);
-      resizeObserver.observe(container);
+      if (!staticPreview) { resizeObserver = new ResizeObserver(resize); resizeObserver.observe(container); }
       resize();
-      visibilityObserver = new IntersectionObserver(([entry]) => {
+      if (!staticPreview) visibilityObserver = new IntersectionObserver(([entry]) => {
         visible = entry.isIntersecting;
         if (!visible) { cancelAnimationFrame(frame); frame = 0; lastTime = 0; container.dataset.rendering = 'false'; }
         else invalidate();
       });
-      visibilityObserver.observe(container);
+      visibilityObserver?.observe(container);
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) { cancelAnimationFrame(frame); frame = 0; lastTime = 0; container.dataset.rendering = 'false'; }
         else invalidate();
@@ -178,21 +191,16 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
       document.addEventListener('productmodalchange', invalidate, { signal: abort.signal });
       motion.addEventListener('change', () => { speed = 0; invalidate(); }, { signal: abort.signal });
       window.addEventListener('resize', resize, { signal: abort.signal });
-      // Solo un archivo local. Fetch permite abortar al cerrar durante la descarga.
-      const url = new URL(modelUrl, document.baseURI);
-      const response = await fetch(url, { signal: abort.signal });
-      if (!response.ok) throw new Error(`GLB: HTTP ${response.status}`);
-      // Un GLB seleccionado en Admin usa una URL blob, que no admite rutas relativas.
-      const resourcePath = url.protocol === 'blob:' ? document.baseURI : new URL('.', url).href;
-      const gltf = await new GLTFLoader().parseAsync(await response.arrayBuffer(), resourcePath);
-      if (disposed) { disposeObjects(gltf.scenes); return false; }
-      modelScenes = gltf.scenes;
-      const model = gltf.scene;
+      modelLease = await acquireProductModel(modelUrl, { signal: abort.signal });
+      if (disposed) { modelLease.release(); return false; }
+      const model = modelLease.model;
       tuneStudioGlass(model);
       model.rotation.x = initialRotation.x ?? 0;
       model.rotation.y = initialRotation.y ?? 0;
       modelRadius = normalizeModel(model);
       spin.add(model);
+      // Medir el layout definitivo antes del primer frame y del viaje compartido.
+      stage?.classList.add('has-model');
       resize();
       loaded = true;
       // Se retira visualmente el respaldo únicamente después del primer render exitoso.
@@ -201,13 +209,36 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
       canvas.classList.add('is-ready');
       container.setAttribute('role', 'group');
       container.setAttribute('aria-label', `Vista 3D de ${label}`);
-      stage?.classList.add('has-model');
       invalidate();
       return true;
     } catch (error) { if (!disposed) fail(error); return false; }
   })();
 
   return { ready, dispose,
+    snapshot(target) {
+      if (!loaded || disposed) return null;
+      render(performance.now());
+      target.width = renderer.domElement.width; target.height = renderer.domElement.height;
+      target.getContext('2d').drawImage(renderer.domElement, 0, 0);
+      return { distance: camera.position.length(), height: container.getBoundingClientRect().height };
+    },
+    setFlightFrame(state) {
+      if (!loaded || disposed) return;
+      cancelAnimationFrame(frame); frame = 0; held = true; flight = state; controls.enabled = false;
+      const canvas = renderer.domElement;
+      if (canvas.parentElement !== state.layer) {
+        state.layer.append(canvas); canvas.tabIndex = -1;
+        renderer.setSize(state.width, state.height, false);
+      }
+      render(performance.now());
+    },
+    finishFlight() {
+      if (!loaded || disposed) return;
+      flight = null; held = false;
+      container.append(renderer.domElement); renderer.domElement.tabIndex = interactive ? 0 : -1;
+      controls.enabled = interactive; visible = true; lastTime = 0; lastInteraction = performance.now();
+      resize(); render(performance.now()); invalidate();
+    },
     setExpanded(value) {
       if (!loaded || disposed || expanded === value) return;
       if (value) savedCamera = camera.position.clone().divideScalar(fittedDistance);
@@ -250,6 +281,6 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
       }
       if (loaded) invalidate();
     },
-    getState() { return { disposed, loaded, expanded, frames: frameCount, rendering: Boolean(frame), speed, rotation: spin?.rotation.y, distance: controls?.getDistance(), azimuth: controls?.getAzimuthalAngle(), polar: controls?.getPolarAngle(), minDistance: controls?.minDistance, maxDistance: controls?.maxDistance, transition: transitionFrame ? { ...transitionFrame } : null }; },
+    getState() { return { disposed, loaded, expanded, frames: frameCount, rendering: Boolean(frame), speed, rotation: spin?.rotation.y, fittedDistance, cameraDistance: camera?.position.length(), flight: flight ? { x:flight.x, y:flight.y, scale:flight.scale } : null, distance: controls?.getDistance(), azimuth: controls?.getAzimuthalAngle(), polar: controls?.getPolarAngle(), minDistance: controls?.minDistance, maxDistance: controls?.maxDistance, transition: transitionFrame ? { ...transitionFrame } : null }; },
   };
 }

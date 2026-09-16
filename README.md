@@ -9,7 +9,7 @@ Este repositorio contiene el estado actual del **Frontend**. Funciona con datos 
 Frontend funcional con:
 
 - **Home:** presentación de la colección y transición cinematográfica por scroll.
-- **Catálogo y detalle de productos:** tarjetas, información y modales accesibles.
+- **Catálogo y detalle de productos:** previews de los GLB reales renderizados bajo demanda y transición compartida hasta el visor; imagen o representación conceptual de respaldo. Información y modales accesibles.
 - **Visualización 3D:** modelos GLB locales, controles de giro/zoom y visor ampliado.
 - **Perfil:** edición de datos, avatar, direcciones y preferencias locales.
 - **Seguimiento ficticio e historial de pedidos:** datos mock compartidos con Administración.
@@ -129,6 +129,7 @@ Los equipos deberán acordar persistencia, autenticación/autorización, archivo
 
 Se conserva la documentación existente:
 
+- [Previews 3D, caché y transición compartida de productos](docs/catalog-3d-transition.md).
 - [Account / Profile y contratos de Cuenta](docs/account-contracts.md).
 - [Admin, Product, inventario, archivos y analítica](docs/admin-contracts.md).
 - [Notas históricas de implementación, Hero y visor 3D](docs/frontend-history.md): conserva el README anterior y señala su carácter histórico.

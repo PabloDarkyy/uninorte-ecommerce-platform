@@ -19,7 +19,7 @@ const fixture = `<!doctype html><html><head><script type="importmap">{"imports":
     });
     await page.goto(base);
     await page.waitForFunction(() => document.querySelector('.hero [data-viewer-state="ready"]'));
-    assert.equal(await page.locator('canvas').count(), 1);
+    assert.equal(await page.locator('canvas.product-canvas').count(), 1);
     assert.equal(await page.locator('.exhibit-topline').count(), 0);
     assert.ok(await page.locator('.hero .concept-product').isHidden());
     assert.equal(await page.locator('.product-grid canvas').count(), 0);
@@ -38,11 +38,11 @@ const fixture = `<!doctype html><html><head><script type="importmap">{"imports":
     await page.locator('#catalog').scrollIntoViewIfNeeded();
     for (let i = 0; i < 5; i++) {
       await page.locator('[data-product-preview="licor"]').click();
-      await page.waitForFunction(() => document.querySelector('dialog [data-viewer-state="ready"]'));
-      assert.equal(await page.locator('canvas').count(), 2);
+      await page.waitForFunction(() => document.querySelector('dialog[data-product-transition="ready"] [data-viewer-state="ready"]'));
+      assert.equal(await page.locator('canvas.product-canvas').count(), 2);
       await page.keyboard.press('Escape');
       await page.locator('dialog').waitFor({ state: 'detached' });
-      assert.equal(await page.locator('canvas').count(), 1);
+      assert.equal(await page.locator('canvas.product-canvas').count(), 1);
     }
     for (const [width, height] of [[375,812], [768,1024], [1440,1000]]) {
       await page.setViewportSize({ width, height });
@@ -71,7 +71,7 @@ const fixture = `<!doctype html><html><head><script type="importmap">{"imports":
     }, modelUrl);
     assert.equal(await mount(), true);
     await page.waitForFunction(() => viewer.getState().speed > 0.05);
-    const canvas = page.locator('canvas');
+    const canvas = page.locator('canvas.product-canvas');
     const bounds = await canvas.boundingBox();
     const azimuth = await page.evaluate(() => viewer.getState().azimuth);
     await page.mouse.move(bounds.x + 100, bounds.y + 170);
@@ -131,11 +131,12 @@ const fixture = `<!doctype html><html><head><script type="importmap">{"imports":
         const original = WebGL2RenderingContext.prototype[name];
         WebGL2RenderingContext.prototype[name] = function (...args) { gpuDeletes[key]++; return original.apply(this, args); };
       }
+      window.disposedContext=document.querySelector('#fixture canvas').getContext('webgl2');
       viewer.dispose();
     });
     assert.equal(await canvas.count(), 0);
     assert.ok(await page.evaluate(() => viewer.getState().disposed && !viewer.getState().rendering));
-    assert.ok(await page.evaluate(() => gpuDeletes.buffer > 0 && gpuDeletes.texture > 0 && gpuDeletes.program > 0));
+    assert.ok(await page.evaluate(() => disposedContext.isContextLost() && gpuDeletes.texture > 0 && gpuDeletes.program > 0));
     assert.equal(await mount(), true);
     await page.evaluate(() => viewer.dispose());
     // Cerrar mientras el GLB está en tránsito no crea un canvas después del cierre.
@@ -157,12 +158,12 @@ const fixture = `<!doctype html><html><head><script type="importmap">{"imports":
     const fallback = await browser.newPage();
     const fallbackErrors = [];
     fallback.on('pageerror', error => fallbackErrors.push(error.message));
-    await fallback.route('**/licor-mandioca.glb', route => route.fulfill({ status: 404, body: 'Missing' }));
+    await fallback.route('**/*.glb', route => route.fulfill({ status: 404, body: 'Missing' }));
     await fallback.goto(base);
     await fallback.waitForFunction(() => document.querySelector('.hero [data-viewer-state="fallback"]'));
     assert.ok(await fallback.locator('.hero .concept-product').isVisible());
     await fallback.locator('[data-product-preview="licor"]').click();
-    await fallback.waitForFunction(() => document.querySelector('dialog [data-viewer-state="fallback"]'));
+    await fallback.waitForFunction(() => document.querySelector('dialog[data-product-transition="ready"] [data-viewer-state="fallback"]'));
     assert.ok(await fallback.locator('dialog .concept-product').isVisible());
     assert.equal(await fallback.locator('canvas').count(), 0);
     assert.deepEqual(fallbackErrors, []);

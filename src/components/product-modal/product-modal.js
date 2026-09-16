@@ -1,3 +1,4 @@
+import { createProductEntrance } from '../../modules/product-entrance.js';
 import { animateSurface } from '../../modules/ui-motion.js';
 import { productStage, mountProductStage } from '../product-stage/product-stage.js';
 import { displayText, displayPrice, productAccent } from '../../utils/product-display.js';
@@ -11,16 +12,17 @@ export function closeProductModal() {
   activeDialog.closeExpanded?.();
   activeDialog.close();
 }
-export function openProductModal(product, trigger) {
-  if (!product || activeDialog) return;
+export function openProductModal(product, trigger, selection) {
+  if (!product || activeDialog) { selection?.release?.(); return; }
   const dialog = document.createElement('dialog');
-  let viewer, disposeExpanded, surfaceAnimation, closing = false;
+  let viewer, disposeExpanded, surfaceAnimation, entrance, closing = false;
   function requestClose() {
-    if (closing) return; closing = true; surfaceAnimation?.cancel(); dialog.classList.add('is-closing');
+    if (closing) return; closing = true; entrance?.finish(); surfaceAnimation?.cancel(); dialog.classList.add('is-closing');
     surfaceAnimation = animateSurface(dialog.querySelector('.modal-card'), false);
     surfaceAnimation.finished.then(() => dialog.close()).catch(() => {});
   }
   dialog.className = 'product-modal';
+  if (selection) { dialog.classList.add('is-product-entering'); dialog.dataset.productTransition='preparing'; dialog.tabIndex=-1; }
   dialog.setAttribute('aria-labelledby', 'preview-title');
   dialog.setAttribute('aria-describedby', 'preview-description');
   dialog.style.setProperty('--product-accent', productAccent(product));
@@ -51,9 +53,11 @@ export function openProductModal(product, trigger) {
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
   });
   dialog.addEventListener('close', () => {
+    entrance?.dispose();
     surfaceAnimation?.cancel();
     disposeExpanded?.();
     viewer?.dispose();
+    selection?.release?.();
     document.documentElement.classList.remove('modal-open');
     document.dispatchEvent(new Event('productmodalchange'));
     activeDialog = null;
@@ -64,13 +68,18 @@ export function openProductModal(product, trigger) {
   activeDialog = dialog;
   document.documentElement.classList.add('modal-open');
   document.dispatchEvent(new Event('productmodalchange'));
+  if(selection)dialog.querySelector('.modal-card').inert=true;
   dialog.showModal(); // Dialog nativo: Escape, foco contenido y fondo inerte.
-  surfaceAnimation = animateSurface(dialog.querySelector('.modal-card'));
-  viewer = mountProductStage(dialog, product);
-  viewer.ready?.then(ready => {
-    if (ready && dialog.open) {
+  if(!selection)surfaceAnimation = animateSurface(dialog.querySelector('.modal-card'));
+  viewer = mountProductStage(dialog, product, { resources:selection?.resources, startPaused:Boolean(selection), disableModel:Boolean(selection?.failed) });
+  if(selection)entrance=createProductEntrance(dialog,viewer,selection);
+  (async()=>{
+    const ready=await viewer.ready;
+    if(entrance)await entrance.finished;
+    if (ready && dialog.open && !closing) {
       disposeExpanded = mountExpandedViewer(dialog, viewer, displayText(product.name));
       dialog.closeExpanded = () => disposeExpanded?.();
     }
-  });
+  })();
+  return dialog;
 }

@@ -14,7 +14,7 @@ export function normalizeModel(model) {
   return new Box3().setFromObject(model).getBoundingSphere(new Sphere()).radius;
 }
 
-// Cada visor parsea su propia escena: no destruye los recursos del otro visor.
+// Destrucción de recursos propietarios. El cache la usa solo sin consumidores activos.
 export function disposeObjects(roots) {
   const geometries = new Set(), materials = new Set(), textures = new Set(), skeletons = new Set();
   roots.filter(Boolean).forEach(root => root.traverse(object => {
