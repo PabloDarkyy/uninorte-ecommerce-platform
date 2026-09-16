@@ -43,7 +43,7 @@ La aplicación no necesita CDN, servicios externos ni instalar paquetes para eje
 
 ## Ejecutar localmente
 
-1. Tener Node.js 20 o posterior y acceso al repositorio privado.
+1. Tener Node.js 20 o posterior.
 2. Clonar el repositorio y entrar en su carpeta.
 3. Ejecutar:
 
@@ -67,6 +67,12 @@ Accesos de la demo:
 Estas son rutas del Frontend, no endpoints de una API.
 
 No se necesitan variables de entorno ni credenciales para ejecutar esta fase; por eso no se incluye `.env.example`.
+
+## Demo pública y despliegue
+
+La demo se publica en [GitHub Pages](https://pablodarkyy.github.io/uninorte-ecommerce-platform/). El workflow `.github/workflows/pages.yml` ejecuta las pruebas y despliega únicamente `index.html` y `src/` después de cada push a `main`; también admite ejecución manual. Las rutas usan hash y los assets conservan rutas relativas para funcionar bajo el nombre del repositorio.
+
+La demo pública mantiene los mismos servicios mock y almacenamiento local del Frontend: no incorpora Backend, autenticación real ni persistencia compartida entre usuarios.
 
 ## Estructura general y organización modular
 
@@ -123,7 +129,7 @@ Puntos principales:
 - Administración: `src/features/admin/services.js`, que reutiliza productos y pedidos.
 - Analítica: `src/services/analytics/mock-analytics.service.js`.
 
-Los equipos deberán acordar persistencia, autenticación/autorización, archivos y contratos remotos. No hay endpoints definitivos establecidos en esta fase. El panel administrativo es una demostración sin control de acceso real; la visibilidad privada del repositorio no implementa seguridad dentro de la aplicación.
+Los equipos deberán acordar persistencia, autenticación/autorización, archivos y contratos remotos. No hay endpoints definitivos establecidos en esta fase. El panel administrativo es una demostración sin control de acceso real; la visibilidad del repositorio no implementa seguridad dentro de la aplicación.
 
 ## Documentación
 
