@@ -96,7 +96,7 @@ Para la exposición, `trackingService.enter()` avanza entre cinco escenarios al 
 
 `{ language, currency, rememberCurrency, showFeatured, receiveNews }`
 
-`language`: `es | en`; `currency`: `PYG | USD | EUR`; los otros tres campos son booleanos. Las opciones reutilizan `config/languages.js`, `config/currency.js` y los selectores existentes, parametrizados para poder editarse en Cuenta. No se duplica conversión ni se activa el idioma global. En esta fase se guardan preferencias, pero no cambian el catálogo ni generan comunicaciones.
+`language`: `es | en`; `currency`: `PYG | USD | EUR`; los otros tres campos son booleanos. Las opciones reutilizan `config/languages.js`, `config/currency.js` y los selectores existentes, parametrizados para poder editarse en Cuenta. La fase Commerce aplica idioma y moneda a la tienda al guardar estas preferencias, reutilizando los servicios existentes. No se generan comunicaciones.
 
 ## Operaciones async requeridas
 
@@ -127,3 +127,7 @@ El repository usa la clave versionada `uninorte.account.demo.v1` en almacenamien
 `#/account` abre Resumen. Secciones: `#/account/summary`, `/profile`, `/tracking`, `/history`, `/addresses`, `/preferences`. Los detalles utilizan `#/account/tracking/:orderId` y `#/account/history/:orderId`. Se soportan enlaces directos y Atrás/Adelante; volver a la tienda monta de nuevo el Hero y su visor.
 
 Pruebas: `node --test tests/*.test.js` y, con Playwright externo/servidor local, `node tests/account-browser.cjs`. Cubren contratos, clones, validación, persistencia, snapshot de direcciones históricas, coherencia de tracking, edición/cancelación/foto, CRUD, navegación y las seis vistas a 320, 375, 768, 1024 y 1440 px.
+
+## Extensión Commerce
+
+OrderService incorpora `create` con validación, idempotencia y snapshots históricos para el checkout ficticio. Los pedidos creados comparten este repository y TrackingService. Consultar [commerce-contracts.md](commerce-contracts.md).

@@ -1,6 +1,7 @@
 import { escapeHtml as e } from '../../utils/html.js';
 import { displayText, productAccent } from '../../utils/product-display.js';
 import { icon } from '../../utils/icons.js';
+import { productModel } from '../../utils/product-media.js';
 
 export function productStage(product, { context = 'card' } = {}) {
   // El placeholder se mantiene hasta que el visor renderiza correctamente.
@@ -18,6 +19,8 @@ export function mountProductStage(root, product, { context = 'modal', resources,
   const container = root.querySelector('[data-model-mount]');
   let viewer, disposed = false, progress = 0, transitionLayout, transitionFrame;
   const controller = {
+    snapshot(target) { return viewer?.snapshot(target); },
+    async setModel(url) { if(viewer)return viewer.setModel(url);if(!url || disposed)return false;return start(url); },
     getState() { return viewer?.getState(); },
     setFlightFrame(value) { viewer?.setFlightFrame(value); },
     finishFlight() { viewer?.finishFlight(); },
@@ -28,11 +31,11 @@ export function mountProductStage(root, product, { context = 'modal', resources,
     dispose() { disposed = true; viewer?.dispose(); },
   };
   if(disableModel && container)container.dataset.viewerState='fallback';
-  if (!container || !product?.model || disableModel || context === 'card') return controller;
+  if (!container || disableModel || context === 'card') return controller;
   // Importación diferida: el modal no crea un contexto ni carga su GLB antes de abrirse.
-  controller.ready = import('../../modules/three/product-viewer.js').then(({ createProductViewer }) => {
+  function start(url) { return import('../../modules/three/product-viewer.js').then(({ createProductViewer }) => {
     if (disposed) return;
-    viewer = createProductViewer({ container, modelUrl: product.model, label: displayText(product.name),
+    viewer = createProductViewer({ container, modelUrl: url, label: displayText(product.name),
       resources, startPaused, autoRotate: true, interactive: true, initialRotation: { z: -0.12 },
       camera: { zoom: context === 'modal', fill: context === 'hero' ? 0.8 : 0.9 },
     });
@@ -40,6 +43,7 @@ export function mountProductStage(root, product, { context = 'modal', resources,
     if (transitionLayout) viewer.configureTransition(transitionLayout);
     if (transitionFrame) viewer.setTransitionFrame(transitionFrame);
     return viewer.ready;
-  }).catch(error => { if (!disposed) console.error('No se pudo iniciar el visor 3D:', error); });
+  }).catch(error => { if (!disposed) console.error('No se pudo iniciar el visor 3D:', error); }); }
+  if(productModel(product))controller.ready=start(productModel(product));
   return controller;
 }

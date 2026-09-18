@@ -1,3 +1,5 @@
+import { displayText, displayPrice } from '../utils/product-display.js';
+import { t } from '../features/i18n/i18n.js';
 import { motionOptions } from '../modules/ui-motion.js';
 import { productCard } from '../components/product-card/product-card.js';
 import { openProductModal } from '../components/product-modal/product-modal.js';
@@ -27,5 +29,14 @@ export function mountCatalog(root, products) {
       finally { pending = false; card.removeAttribute('aria-busy'); }
     }, { signal: abort.signal });
   });
+  window.addEventListener('preferenceschange',()=>{
+    root.querySelectorAll('[data-product-preview]').forEach(button=>{
+      const p=products.find(p=>p.id===button.dataset.productPreview),card=button.closest('.product-card');
+      card.querySelector('h3').textContent=displayText(p.name);card.querySelector('.card-category').textContent=displayText(p.category);
+      card.querySelector('.card-price').firstChild.textContent=displayPrice(p);card.querySelector('.card-price small').textContent=t('examplePrice');
+      card.querySelector('.availability').firstChild.textContent=t(p.stock>0&&p.availability!=='unavailable'?'available':'unavailable');card.querySelector('.availability small').textContent=t('sampleStock');
+      card.querySelector('.card-origin').textContent=t('collection');button.firstChild.textContent=t('productView');button.setAttribute('aria-label',t('productView')+': '+displayText(p.name));
+    });
+  },{signal:abort.signal});
   return () => { abort.abort(); animation?.cancel(); previews?.dispose(); };
 }

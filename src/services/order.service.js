@@ -1,1 +1,2 @@
-export const orderService = { async list() { return []; } };
+import { accountServices } from '../features/account/services/index.js';
+export const orderService = accountServices.orderService;

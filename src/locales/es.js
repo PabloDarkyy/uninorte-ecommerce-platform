@@ -1,3 +1,4 @@
+import { es as commerce } from './commerce.js';
 export default {
   home: 'Inicio', catalog: 'Catálogo', about: 'Nosotros', contact: 'Contacto', cart: 'Carrito', profile: 'Perfil', login: 'Ingresar', register: 'Registro', orders: 'Pedidos', admin: 'Administración',
   language: 'Idioma', currency: 'Moneda', menu: 'Menú', search: 'Buscar productos', all: 'Todas las categorías', filters: 'Filtros', category: 'Categoría',
@@ -10,4 +11,5 @@ export default {
   personal: 'Datos personales', addresses: 'Direcciones', settings: 'Configuración básica', orderList: 'Lista de pedidos', status: 'Estado', tracking: 'Seguimiento', eta: 'Tiempo estimado', noOrders: 'Sin pedidos. La simulación de seguimiento se desarrollará posteriormente.',
   dashboard: 'Dashboard', products: 'Productos', inventory: 'Stock', adminNotice: 'Layout de demostración. Sin CRUD ni control de acceso real.',
   platform: 'Plataforma universitaria', platformText: 'Proyecto académico UniNorte.', brands: 'Empresas y marcas', academic: 'Información académica pendiente', contactText: 'Canales de contacto pendientes de confirmación.', aboutText: 'Espacio reservado para la presentación del proyecto y los grupos participantes.', navigation: 'Navegación', skip: 'Saltar al contenido',
+  ...commerce,
 };

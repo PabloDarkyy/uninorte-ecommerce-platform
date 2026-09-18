@@ -1,3 +1,5 @@
+import { setLanguage } from '../i18n/i18n.js';
+import { setCurrency } from '../currency/currency.js';
 import { accountServices } from './services/index.js';
 import { isActiveOrder } from './domain.js';
 import { e, avatar, icon } from './components/shared.js';
@@ -119,6 +121,8 @@ export async function accountPage(path, services = accountServices) {
         if (form.dataset.form === 'address') save(async () => { await addressService.save({ ...data, isPrimary: data.isPrimary === 'on' }); editingAddress = null; }, 'Dirección guardada.');
         if (form.dataset.form === 'preferences') save(async () => {
           preferences = await preferenceService.update({ ...data, rememberCurrency: data.rememberCurrency === 'on', showFeatured: data.showFeatured === 'on', receiveNews: data.receiveNews === 'on' });
+          setLanguage(preferences.language);
+          setCurrency(preferences.currency);
         }, 'Preferencias guardadas en esta demostración.');
       }, { signal: abort.signal });
       return () => { disposed = true; avatarToken++; abort.abort(); };

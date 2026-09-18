@@ -1,13 +1,14 @@
 import { createProductViewer } from '../../modules/three/product-viewer.js';
 import { createCatalogRenderer } from '../../modules/three/catalog-renderer.js';
 import { displayText } from '../../utils/product-display.js';
+import { productModel } from '../../utils/product-media.js';
 export function mountCatalogPreviews(root, products) {
   const resources = createCatalogRenderer(), abort = new AbortController(), records = new Map();
   let disposed = false, paused = false, running, activeViewer;
   const host = document.createElement('div'); host.className='catalog-render-host';host.setAttribute('aria-hidden','true'); document.body.append(host);
   for (const button of root.querySelectorAll('[data-product-preview]')) {
     const product=products.find(p=>p.id===button.dataset.productPreview);
-    if (!product?.model) continue;
+    if (!product || !productModel(product)) continue;
     const mount=button.closest('.product-card').querySelector('[data-model-mount]');
     records.set(mount,{product,mount,visible:false,dirty:true,failed:false,used:0});
   }
@@ -21,7 +22,7 @@ export function mountCatalogPreviews(root, products) {
   async function capture(record) {
     const rect=record.mount.getBoundingClientRect();if(!rect.width || !rect.height || disposed)return;
     host.style.width=`${rect.width}px`;host.style.height=`${rect.height}px`;
-    const viewer=createProductViewer({container:host,modelUrl:record.product.model,label:displayText(record.product.name),autoRotate:false,interactive:false,initialRotation:{z:-.12},camera:{fill:.68,zoom:false},resources,staticPreview:true});
+    const viewer=createProductViewer({container:host,modelUrl:productModel(record.product),label:displayText(record.product.name),autoRotate:false,interactive:false,initialRotation:{z:-.12},camera:{fill:.68,zoom:false},resources,staticPreview:true});
     activeViewer=viewer;
     try {
       if(!await viewer.ready || disposed) { if(!disposed && activeViewer===viewer)record.failed=true;return; }

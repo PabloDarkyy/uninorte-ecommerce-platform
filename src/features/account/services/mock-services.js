@@ -2,6 +2,7 @@ import { trackingStages } from '../mocks/account-data.js';
 import { currencyConfig } from '../../../config/currency.js';
 import { languageOptions } from '../../../config/languages.js';
 import { isActiveOrder } from '../domain.js';
+import { convertPrice } from '../../currency/currency.js';
 
 const required = (value, name, max = 160) => {
   const text = String(value ?? '').trim();
@@ -81,9 +82,35 @@ export function createMockAccountServices(repository, productService) {
       const product = await productService.getById(item.productId);
       return { ...item, product, variant: product?.variants.find(variant => variant.id === item.variantId) ?? null, subtotal: item.quantity * item.unitPrice };
     }));
-    return { ...order, status: snapshots.has(order.id) ? 'in_transit' : order.status, items, total: items.reduce((sum, item) => sum + item.subtotal, 0), quantity: items.reduce((sum, item) => sum + item.quantity, 0) };
+    const currentStep=snapshots.get(order.id)?.events.findIndex(event=>event.status==='current');
+    return { ...order, status: currentStep == null ? order.status : order.requestId && currentStep<3 ? 'preparing' : 'in_transit', items, total: Math.round(items.reduce((sum, item) => sum + item.subtotal, 0)*100)/100, quantity: items.reduce((sum, item) => sum + item.quantity, 0) };
   }
   const orderService = {
+    async create({ items, currency, shippingAddress, userId, requestId }) {
+      const state = repository.read();
+      const previous = state.orders.find(o => o.requestId === requestId);
+      if (previous && requestId) return hydrate(previous);
+      if (userId !== state.user.id || !items?.length || !Object.hasOwn(currencyConfig.rates,currency)) throw new Error('INVALID_ORDER');
+      const address = validateAddress(shippingAddress,userId,undefined);
+      delete address.id; delete address.isPrimary;
+      address.postalCode = String(shippingAddress.postalCode || '').slice(0,24);
+      const normalized = [], counts = new Map(), identities = new Set();
+      for (const item of items) {
+        const p = await productService.getById(item.productId), v = p?.variants.find(v=>v.id===item.variantId);
+        const identity = JSON.stringify([item.productId,item.variantId]);
+        counts.set(item.productId,(counts.get(item.productId)||0)+item.quantity);
+        if (!p || p.active === false || p.availability === 'unavailable' || (item.variantId && !v) || identities.has(identity) || !Number.isSafeInteger(item.quantity) || item.quantity<1 || counts.get(p.id)>p.stock || item.quantity>(v?.stock ?? p.stock)) throw new Error('INSUFFICIENT_STOCK');
+        identities.add(identity);
+        const factor=currency==='PYG'?1:100, unitPrice=Math.round(convertPrice(v?.price ?? p.basePrice,p.baseCurrency,currency)*factor)/factor;
+        if (unitPrice !== item.unitPrice) throw new Error('CART_CHANGED');
+        normalized.push({productId:p.id,variantId:v?.id || null,quantity:item.quantity,unitPrice});
+      }
+      const createdAt = new Date().toISOString(), estimatedDelivery = new Date(Date.now()+7*86400000).toISOString().slice(0,10);
+      const order = {id:`ORD-${crypto.randomUUID().slice(0,8).toUpperCase()}`,requestId,userId,items:normalized,currency,total:normalized.reduce((n,i)=>n+i.unitPrice*i.quantity,0),shippingAddress:address,createdAt,status:'preparing',estimatedDelivery};
+      let stored = order;
+      repository.commit(next=>{const duplicate=next.orders.find(o=>requestId && o.requestId===requestId);if(duplicate)stored=duplicate;else next.orders.unshift(order);});
+      return hydrate(stored);
+    },
     async list() { return Promise.all(repository.read().orders.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(hydrate)); },
     async getById(id) {
       const order = repository.read().orders.find(order => order.id === id);
@@ -92,7 +119,7 @@ export function createMockAccountServices(repository, productService) {
     },
   };
   function buildTracking(order, index) {
-    const step = [3, 5, 8, 10, 13][index % 5];
+    const step = order.requestId ? Math.min(13,(snapshots.get(order.id)?.events.findIndex(event=>event.status==='current') ?? 0)+1) : [3, 5, 8, 10, 13][index % 5];
     const start = Date.parse(order.createdAt);
     const events = trackingStages.map((message, i) => ({ id: `${order.id}-event-${i}`, status: i < step ? 'completed' : i === step ? 'current' : 'pending', message,
       timestamp: i <= step ? new Date(start + i * 12 * 3600000).toISOString() : null, completed: i < step }));

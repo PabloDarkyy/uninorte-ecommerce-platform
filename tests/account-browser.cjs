@@ -81,7 +81,9 @@ const avatar = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lE
     assert.equal(await page.locator('#account-language').inputValue(), 'en');
     assert.equal(await page.locator('#account-currency').inputValue(), 'EUR');
     assert.ok(await page.locator('[name="receiveNews"]').isChecked());
-    assert.ok(await page.locator('#language').isDisabled());
+    assert.ok(await page.locator('#language').isEnabled());
+    assert.equal(await page.locator('#language').inputValue(),'en');
+    assert.equal(await page.locator('#currency').inputValue(),'EUR');
 
     await nav('tracking');
     assert.equal(await page.locator('.account-order').count(), 2);
@@ -101,7 +103,7 @@ const avatar = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lE
     assert.equal(await page.locator('.account-order').count(), 4);
     await page.getByRole('link', { name: 'Ver detalles' }).first().click();
     await page.locator('.account-total').waitFor();
-    assert.match(await page.locator('.account-body').textContent(), /Miel de abeja/);
+    assert.match(await page.locator('.account-body').textContent(), /Bee honey/);
     assert.match(await page.locator('.account-body').textContent(), /por unidad/);
     assert.match(await page.locator('.account-delivery').textContent(), /Mariscal López/);
     await page.goBack();

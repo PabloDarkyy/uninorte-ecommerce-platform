@@ -18,18 +18,15 @@ Frontend funcional con:
 - **Reportes ficticios:** gráficos locales con estadísticas coherentes que cambian al entrar al módulo.
 - **Responsive y animaciones:** adaptación a escritorio/móvil y soporte para movimiento reducido.
 
-### Funciones conservadas o pendientes de activar
+### Commerce de demostración
 
-Para reflejar el código publicado con precisión:
+- Carrito lateral con variantes, cantidades, stock, eliminación y resumen.
+- Añadir al carrito y Comprar ahora con captura del modelo visible y transición coordinada.
+- Checkout de cinco pasos, pago completamente ficticio y confirmación integrada con Perfil/Tracking.
+- Selectores ES/EN y PYG/USD/EUR activos para Commerce; los pedidos conservan moneda y precios históricos.
+- GLB por variante y selección desde Admin, reutilizando caché, renderer y entorno.
 
-| Función | Estado de este repositorio |
-| --- | --- |
-| Carrito | Servicios y módulos de una fase anterior conservados; el botón de la navegación actual está deshabilitado y la página no está montada en el router. |
-| Checkout simulado | Pendiente. La página anterior del carrito contiene una indicación de checkout futuro, no un flujo de compra terminado. |
-| Selector de idioma | Visible pero deshabilitado en la navegación. En Perfil permite guardar la preferencia ES/EN; no cambia el idioma de toda la tienda. |
-| Selector de moneda | Visible pero deshabilitado en la navegación. En Perfil guarda la preferencia PYG/USD/EUR; no activa conversión global. Administración permite elegir la moneda base de cada producto. |
-
-La preparación del repositorio no habilita estas funciones ni modifica su comportamiento.
+El carrito vive en memoria durante la sesión. Los datos de tarjeta nunca se guardan. No hay pagos reales, Backend, autenticación ni base de datos. Account/Admin conservan los textos previos fuera del flujo Commerce.
 
 ## Tecnologías
 
@@ -84,9 +81,10 @@ src/
   sections/               Secciones de la tienda
   components/             Navbar, Hero, tarjetas, modales y visor compartido
   features/
+    checkout/             Flujo de compra simulado
     account/              Perfil, direcciones, preferencias, pedidos y tracking
     admin/                Dashboard, productos, inventario, pedidos y ventas
-    cart/, currency/, i18n/ Módulos anteriores conservados
+    cart/, currency/, i18n/ Carrito y preferencias compartidas
   services/               Contratos y servicios consumidos por las vistas
     products/             Repositorio mock y archivos temporales
     analytics/            Generación aislada de estadísticas ficticias
@@ -133,14 +131,14 @@ Los equipos deberán acordar persistencia, autenticación/autorización, archivo
 
 ## Documentación
 
-Se conserva la documentación existente:
+Documentación de integración:
 
+- [Carrito, checkout, pedidos y variantes 3D](docs/commerce-contracts.md).
 - [Previews 3D, caché y transición compartida de productos](docs/catalog-3d-transition.md).
 - [Account / Profile y contratos de Cuenta](docs/account-contracts.md).
 - [Admin, Product, inventario, archivos y analítica](docs/admin-contracts.md).
 - [Notas históricas de implementación, Hero y visor 3D](docs/frontend-history.md): conserva el README anterior y señala su carácter histórico.
 
-No hay actualmente un documento independiente de Commerce en `docs/`. Los módulos existentes de carrito, moneda e idioma se conservan en `src/`; su estado está aclarado arriba. No se eliminó ningún contrato ni mock para preparar GitHub.
 
 ## Verificación
 

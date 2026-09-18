@@ -15,17 +15,18 @@ const fs = require('node:fs');
       if (url.origin !== 'http://127.0.0.1:4173') { external.push(url.href); return route.abort(); }
       return route.continue();
     });
-    // Las preferencias de Fase 1 no deben activar idioma ni moneda en esta preview.
+    // Las preferencias existentes ahora se aplican a Commerce.
     await page.addInitScript(() => { localStorage.setItem('uninorte.language', 'en'); localStorage.setItem('uninorte.currency', 'USD'); });
     await page.goto('http://127.0.0.1:4173');
     await page.locator('.product-card').last().waitFor();
     await page.waitForFunction(() => document.querySelector('.hero [data-model-mount]')?.dataset.viewerState === 'ready');
     assert.equal(await page.locator('.product-card').count(), 6);
-    assert.equal(await page.locator('html').getAttribute('lang'), 'es');
-    assert.ok(await page.locator('#language').isDisabled());
-    assert.ok(await page.locator('#currency').isDisabled());
-    assert.ok(await page.locator('.cart-preview').isDisabled());
-    assert.match(await page.locator('.card-price').first().textContent(), /PYG/);
+    assert.equal(await page.locator('html').getAttribute('lang'), 'en');
+    assert.ok(await page.locator('#language').isEnabled());
+    assert.ok(await page.locator('#currency').isEnabled());
+    assert.ok(await page.locator('.cart-preview').isEnabled());
+    assert.match(await page.locator('.card-price').first().textContent(), /USD/);
+    await page.locator('#language').selectOption('es');await page.locator('#currency').selectOption('PYG');
     fs.mkdirSync('.verification', { recursive: true });
     await page.screenshot({ path: '.verification/visual-desktop.png', fullPage: true });
     for (const [index, name] of ['Maní', 'Miel de abeja', 'Harina de trigo', 'Esencia de petitgrain', 'Licor de mandioca', 'Mix de yuyo'].entries()) {
@@ -52,7 +53,7 @@ const fs = require('node:fs');
     }
     await page.locator('.product-card h3').first().click();
     await page.locator('dialog[open]').waitFor();
-    await page.getByRole('button', { name: 'Cerrar', exact: true }).click();
+    await page.locator('[data-close]').last().click();
     await page.locator('dialog').waitFor({ state: 'detached' });
     await page.locator('[data-product-preview]').first().click();
     await page.locator('dialog[open]').waitFor();
@@ -97,7 +98,7 @@ const fs = require('node:fs');
     await page.locator('.admin-sidebar').waitFor();
     assert.equal(await page.locator('.admin-sidebar nav a').count(), 5);
     assert.equal(await page.locator('#add-form, #auth-form, .product-grid canvas').count(), 0);
-    assert.ok(!requested.some(path => /cart.service|auth.service|features\/currency|features\/i18n/.test(path)), 'Previous functional modules are not loaded');
+    assert.ok(requested.some(path => /cart.service/.test(path)), 'Shared cart service is loaded');
     assert.deepEqual(errors, []);
     assert.deepEqual(external, []);
     console.log('PASS: 6 generic previews, Escape/buttons/backdrop close, details disclosure, focus trap/restoration, visual controls, section navigation, 5 responsive sizes, local resources only, no JS errors.');

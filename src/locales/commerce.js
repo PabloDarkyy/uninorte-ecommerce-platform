@@ -1,0 +1,26 @@
+export const es = {
+  variantModel:'GLB de variante', modelLinked:'Modelo asociado', removeModel:'Quitar GLB', addressLine:'Dirección',
+  buyNow:'Comprar ahora', add:'Añadir al carrito', myCart:'Mi carrito', keepShopping:'Seguir comprando', checkout:'Continuar compra', close:'Cerrar', back:'Atrás', next:'Continuar',
+  checkoutTitle:'Tu compra, paso a paso', payment:'Pago simulado', review:'Revisión', confirmation:'Confirmación', simulated:'Pago simulado — No se realizará ningún cargo real.',
+  cardNotice:'Usa datos ficticios. La información de tarjeta se descarta al continuar.', holder:'Nombre del titular', cardNumber:'Número de tarjeta ficticia', expiry:'MM/AA', cvv:'CVV',
+  city:'Ciudad', country:'País', postalCode:'Código postal (opcional)', savedAddress:'Dirección guardada', newAddress:'Otra dirección',
+  confirmPurchase:'Confirmar compra simulada', confirmed:'Pedido confirmado', confirmedText:'Tu compra simulada fue realizada correctamente.', preparing:'Preparando', viewTracking:'Ver seguimiento', backCatalog:'Volver al catálogo',
+  cartError:'No se pudo agregar el producto.', stockError:'No hay stock suficiente. Revisa la cantidad.', checkoutError:'No se pudo confirmar. Revisa el carrito y vuelve a intentar.', cartChanged:'El carrito o los precios cambiaron. Revisa el pedido nuevamente.',
+  paymentError:'Revisa los datos ficticios de pago.', available:'Disponible', unavailable:'Sin stock', examplePrice:'Precio de demostración', additional:'Información adicional', hideDetails:'Ocultar detalles', showDetails:'Ver detalles',
+  preview:'VISTA DEL PRODUCTO', origin:'Origen paraguayo', units:'unidades', detailsPending:'Información pendiente del equipo responsable.', cartUpdated:'Carrito actualizado.', orderDate:'Fecha',
+  cartInvalid:'Hay productos modificados o sin stock. Ajusta o elimina las filas antes de continuar.', variantLoading:'Cambiando presentación…', variantError:'No se pudo cargar el modelo. Se muestra la imagen de respaldo.',
+  decrease:'Disminuir cantidad', increase:'Aumentar cantidad', collection:'COLECCIÓN PARAGUAYA', sampleStock:'Stock de demostración', productView:'Ver producto',
+};
+export const en = {
+  variantModel:'Variant GLB', modelLinked:'Model attached', removeModel:'Remove GLB', addressLine:'Address',
+  buyNow:'Buy now', add:'Add to cart', myCart:'My cart', keepShopping:'Continue shopping', checkout:'Proceed to checkout', close:'Close', back:'Back', next:'Continue',
+  checkoutTitle:'Your purchase, step by step', payment:'Simulated payment', review:'Review', confirmation:'Confirmation', simulated:'Simulated payment — No real charge will be made.',
+  cardNotice:'Use fictional details. Card information is discarded when you continue.', holder:'Cardholder name', cardNumber:'Fictional card number', expiry:'MM/YY', cvv:'CVV',
+  city:'City', country:'Country', postalCode:'Postal code (optional)', savedAddress:'Saved address', newAddress:'Another address',
+  confirmPurchase:'Confirm simulated purchase', confirmed:'Order confirmed', confirmedText:'Your simulated purchase was completed successfully.', preparing:'Preparing', viewTracking:'Track order', backCatalog:'Back to catalog',
+  cartError:'Unable to add the product.', stockError:'Not enough stock. Check the quantity.', checkoutError:'Unable to confirm. Review your cart and try again.', cartChanged:'Your cart or prices changed. Review the order again.',
+  paymentError:'Check your fictional payment details.', available:'Available', unavailable:'Out of stock', examplePrice:'Demo price', additional:'Additional information', hideDetails:'Hide details', showDetails:'Show details',
+  preview:'PRODUCT VIEW', origin:'Paraguayan origin', units:'units', detailsPending:'Information pending from the responsible team.', cartUpdated:'Cart updated.', orderDate:'Date',
+  cartInvalid:'Some products changed or are unavailable. Adjust or remove the rows to continue.', variantLoading:'Changing option…', variantError:'Unable to load the model. Showing the fallback image.',
+  decrease:'Decrease quantity', increase:'Increase quantity', collection:'PARAGUAYAN COLLECTION', sampleStock:'Demo stock', productView:'View product',
+};

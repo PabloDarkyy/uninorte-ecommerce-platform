@@ -1,3 +1,5 @@
+import { renderNavbar } from './components/navbar/navbar.js';
+import { getLanguage } from './features/i18n/i18n.js';
 import { renderRoute, navigateToSection } from './router.js';
 window.addEventListener('hashchange', () => navigateToSection());
 document.querySelector('#skip-link').addEventListener('click', event => { event.preventDefault(); document.querySelector('#main').focus(); });
@@ -13,3 +15,5 @@ document.addEventListener('click', event => {
   if (link && link.hash === location.hash) { event.preventDefault(); navigateToSection(); }
 });
 renderRoute();
+
+window.addEventListener('preferenceschange',()=>{document.documentElement.lang=getLanguage();renderNavbar(document.querySelector('#header'));});

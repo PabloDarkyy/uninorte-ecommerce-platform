@@ -1,3 +1,4 @@
+import { getLanguage } from './features/i18n/i18n.js';
 import { routes } from './config/routes.js';
 import { homePage } from './pages/home/home.js';
 import { renderNavbar } from './components/navbar/navbar.js';
@@ -55,7 +56,7 @@ export async function navigateToSection({ focus = true, cinematic = false } = {}
   else if (focus) { target?.focus({ preventScroll: true }); target?.scrollIntoView({ block: 'start' }); }
 }
 export async function renderRoute() {
-  document.documentElement.lang = 'es';
+  document.documentElement.lang = getLanguage();
   renderNavbar(document.querySelector('#header'));
   renderFooter(document.querySelector('#footer'));
   await navigateToSection({ focus: Boolean(location.hash) });

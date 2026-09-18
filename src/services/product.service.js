@@ -22,8 +22,8 @@ export function createProductService(repository) {
   const service = {
     async list({ includeInactive = false } = {}) { await pending; return (await repository.read()).filter(p => includeInactive || p.active !== false); },
     async getById(id) { await pending; return (await repository.read()).find(p => p.id === id) ?? null; },
-    createProduct(data) { return mutate(all => { const id = crypto.randomUUID(); const p = validate({ active: true, featured: false, image: null, images: [], model: null, stock: 0, variants: [], ...data, id, slug: id }); all.push(p); return p; }); },
-    updateProduct(id, data) { return mutate(all => { const i = all.findIndex(p => p.id === id); if (i < 0) throw new Error('Producto no encontrado.'); all[i] = validate({ ...all[i], ...data, id, slug: all[i].slug }); return all[i]; }); },
+    createProduct(data) { return mutate(all => { const id = crypto.randomUUID(); const p = validate({ active: true, featured: false, image: null, images: [], model: null, stock: 0, variants: [], ...data, model: data.model3dUrl ?? data.model ?? null, id, slug: id }); delete p.model3dUrl; all.push(p); return p; }); },
+    updateProduct(id, data) { return mutate(all => { const i = all.findIndex(p => p.id === id); if (i < 0) throw new Error('Producto no encontrado.'); const media=Object.hasOwn(data,'model3dUrl') ? {model:data.model3dUrl} : {}; all[i] = validate({ ...all[i], ...data, ...media, id, slug: all[i].slug }); delete all[i].model3dUrl; return all[i]; }); },
     deactivateProduct(id) { return service.updateProduct(id, { active: false }); },
     setProductFeatured(id, featured) { return service.updateProduct(id, { featured: Boolean(featured) }); },
     async getInventory() { return (await service.list({ includeInactive: true })).flatMap(p => [

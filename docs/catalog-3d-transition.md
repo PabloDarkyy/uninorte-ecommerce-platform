@@ -58,7 +58,7 @@ Sin GLB se utiliza la imagen o representación conceptual como elemento comparti
 - Los listeners de captura/transición se eliminan al desmontar, y el RAF de viaje no permanece después de llegar.
 - Con `prefers-reduced-motion`, se coloca directamente el producto sin recorrido largo.
 - No se depende de View Transitions API, CDN ni bibliotecas nuevas.
-- El detalle conserva sus funciones actuales: información, variantes mostradas, precio, stock, ampliación, controles orbitales, zoom y cierre. La selección de compra, carrito/checkout y cambios globales de idioma/moneda siguen en el estado descrito en README; esta fase no los implementa ni los activa.
+- La fase Commerce amplía el detalle con selección de variantes, carrito y checkout, manteniendo este renderer y el caché. Ver [contratos Commerce](commerce-contracts.md).
 
 ## Verificación
 

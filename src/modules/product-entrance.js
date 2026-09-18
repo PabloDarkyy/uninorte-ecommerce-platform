@@ -1,4 +1,35 @@
 export const productFlightDuration = 900;
+import { motionOptions } from './ui-motion.js';
+
+// Commerce reuses this transition module; a 2D capture needs no new WebGL context.
+export function captureProduct(viewer, mount) {
+  const canvas=document.createElement('canvas');
+  if(viewer.snapshot(canvas)){
+    const context=canvas.getContext('2d'),pixels=context.getImageData(0,0,canvas.width,canvas.height).data;
+    let left=canvas.width,top=canvas.height,right=0,bottom=0;
+    for(let y=0;y<canvas.height;y++)for(let x=0;x<canvas.width;x++)if(pixels[(y*canvas.width+x)*4+3]>4){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
+    const rect=mount.getBoundingClientRect();
+    if(right>left&&bottom>top){const cropped=document.createElement('canvas');cropped.width=right-left+1;cropped.height=bottom-top+1;cropped.getContext('2d').drawImage(canvas,left,top,cropped.width,cropped.height,0,0,cropped.width,cropped.height);return {node:cropped,url:cropped.toDataURL('image/png'),rect:{left:rect.left+left/canvas.width*rect.width,top:rect.top+top/canvas.height*rect.height,width:cropped.width/canvas.width*rect.width,height:cropped.height/canvas.height*rect.height}};}
+  }
+  const source=mount.querySelector('.stage-product-image') || mount.querySelector('.concept-product');
+  if(!source)return null;
+  const rect=source.getBoundingClientRect(),copy=freezeCopy(source),node=document.createElement('div');
+  const matrix=new DOMMatrix(getComputedStyle(source).transform==='none'?undefined:getComputedStyle(source).transform);
+  Object.assign(copy.style,{position:'absolute',left:'50%',top:'50%',right:'auto',bottom:'auto',margin:'0',width:`${source.offsetWidth}px`,height:`${source.offsetHeight}px`,transform:`translate(-50%,-50%) matrix(${matrix.a},${matrix.b},${matrix.c},${matrix.d},0,0)`});node.append(copy);
+  return {node,rect};
+}
+export async function flyProduct({capture,target,host,signal,start=()=>{}}) {
+  if(!capture || !target || signal?.aborted || matchMedia('(prefers-reduced-motion: reduce)').matches){await start();return;}
+  const from=capture.rect,to=target.getBoundingClientRect(),a=center(from),b=center(to);
+  const layer=document.createElement('div');layer.className='product-flight-layer commerce-flight';layer.setAttribute('aria-hidden','true');
+  const node=capture.node;Object.assign(node.style,{position:'fixed',left:'0',top:'0',width:`${from.width}px`,height:`${from.height}px`,margin:'0',maxWidth:'none',maxHeight:'none',transformOrigin:'center',objectFit:'contain'});layer.append(node);host.append(layer);
+  const scale=Math.min(to.width/from.width,to.height/from.height),arc=Math.min(110,Math.hypot(b.x-a.x,b.y-a.y)*.2);
+  const frames=Array.from({length:25},(_,i)=>{const p=i/24;return {offset:p,transform:`translate(${a.x+(b.x-a.x)*p-from.width/2}px,${a.y+(b.y-a.y)*p-Math.sin(p*Math.PI)*arc-from.height/2}px) scale(${1+(scale-1)*p})`,opacity:1};});
+  const animation=node.animate(frames,{...motionOptions(),duration:780,fill:'forwards'});
+  const cancel=()=>animation.cancel();window.addEventListener('resize',cancel);signal?.addEventListener('abort',cancel,{once:true});
+  const previous=target.style.visibility;target.style.visibility='hidden';
+  try{await Promise.all([animation.finished,start()]);}catch{/* Closing or resize completes the visual transfer. */}finally{animation.cancel();layer.remove();target.style.visibility=previous;window.removeEventListener('resize',cancel);signal?.removeEventListener('abort',cancel);}
+}
 const clamp = value => Math.min(1,Math.max(0,value));
 export function productFlightFrame(from,to,progress) {
   const t=clamp(progress), ease=t*t*(3-2*t);

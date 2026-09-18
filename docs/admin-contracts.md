@@ -95,3 +95,7 @@ El detalle y los diálogos administrativos combinan opacidad y escala suave. El 
 - Regresión: `tests/account-browser.cjs`, `tests/browser-smoke.cjs`, `tests/navigation-expanded.cjs` y `tests/hero-scroll.cjs`.
 
 Las pruebas de navegador utilizan Playwright disponible en el entorno de desarrollo; no es una dependencia de ejecución de la web.
+
+## Modelos por variante (fase Commerce)
+
+Cada variante admite `model3dUrl` opcional y el editor permite seleccionar/quitar su GLB. ProductService normaliza el alias de producto `model3dUrl` a `model`, conservando un solo tipo Product. El servicio de assets incluye las referencias GLB de variantes para liberar solo archivos descartados. Ver [commerce-contracts.md](commerce-contracts.md).

@@ -11,7 +11,7 @@ export function createProductAssetService(urls = URL) {
     async uploadProductImage(file) { return select(file, false); },
     async uploadProductModel(file) { return select(file, true); },
     release(url) { if (owned.delete(url)) urls.revokeObjectURL(url); },
-    references(p) { return [p.image, ...(p.images || []), p.model, ...(p.variants || []).map(v => v.image)].filter(Boolean); },
+    references(p) { return [p.image, ...(p.images || []), p.model, p.model3dUrl, ...(p.variants || []).flatMap(v => [v.image,v.model3dUrl,v.model])].filter(Boolean); },
   };
 }
 export const productAssets = createProductAssetService();

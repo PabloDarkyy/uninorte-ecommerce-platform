@@ -215,11 +215,29 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
   })();
 
   return { ready, dispose,
+    async setModel(url) {
+      await ready;
+      if (disposed) return false;
+      if (!url) { loaded=false; spin.clear(); modelLease?.release(); modelLease=null;stage?.classList.remove('has-model');container.dataset.viewerState='fallback';return false; }
+      if (url===modelUrl && loaded) return true;
+      let next;
+      try {
+        next=await acquireProductModel(url,{signal:abort.signal});
+        if(disposed){next.release();return false;}
+        tuneStudioGlass(next.model);next.model.rotation.x=initialRotation.x ?? 0;next.model.rotation.y=initialRotation.y ?? 0;
+        modelRadius=normalizeModel(next.model);spin.clear();modelLease?.release();modelLease=next;modelUrl=url;spin.add(next.model);loaded=true;
+        stage?.classList.add('has-model');resize();render(performance.now());container.dataset.viewerState='ready';invalidate();return true;
+      } catch { next?.release();if(!disposed){loaded=false;spin.clear();modelLease?.release();modelLease=null;stage?.classList.remove('has-model');container.dataset.viewerState='fallback';}return false; }
+    },
     snapshot(target) {
       if (!loaded || disposed) return null;
+      // A scrolled detail can be outside the viewport when its Buy button is clicked.
+      const previousVisible=visible,previousHeld=held;
+      visible=true;held=true;
       render(performance.now());
       target.width = renderer.domElement.width; target.height = renderer.domElement.height;
       target.getContext('2d').drawImage(renderer.domElement, 0, 0);
+      visible=previousVisible;held=previousHeld;
       return { distance: camera.position.length(), height: container.getBoundingClientRect().height };
     },
     setFlightFrame(state) {

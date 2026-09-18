@@ -12,3 +12,5 @@
 @import '../features/admin/admin.css';
 @import './motion.css';
 @import '../components/product-preview/product-preview.css';
+
+@import '../features/cart/commerce.css';
