@@ -215,7 +215,7 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
   })();
 
   return { ready, dispose,
-    async setModel(url) {
+    async setModel(url, options = {}) {
       await ready;
       if (disposed) return false;
       if (!url) { loaded=false; spin.clear(); modelLease?.release(); modelLease=null;stage?.classList.remove('has-model');container.dataset.viewerState='fallback';return false; }
@@ -224,10 +224,13 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
       try {
         next=await acquireProductModel(url,{signal:abort.signal});
         if(disposed){next.release();return false;}
+        if(options.canCommit && !options.canCommit()){next.release();return false;}
+        await options.beforeCommit?.();
+        if(disposed || (options.canCommit && !options.canCommit())){next.release();return false;}
         tuneStudioGlass(next.model);next.model.rotation.x=initialRotation.x ?? 0;next.model.rotation.y=initialRotation.y ?? 0;
         modelRadius=normalizeModel(next.model);spin.clear();modelLease?.release();modelLease=next;modelUrl=url;spin.add(next.model);loaded=true;
         stage?.classList.add('has-model');resize();render(performance.now());container.dataset.viewerState='ready';invalidate();return true;
-      } catch { next?.release();if(!disposed){loaded=false;spin.clear();modelLease?.release();modelLease=null;stage?.classList.remove('has-model');container.dataset.viewerState='fallback';}return false; }
+      } catch { next?.release();if(!disposed && !options.retainOnError){loaded=false;spin.clear();modelLease?.release();modelLease=null;stage?.classList.remove('has-model');container.dataset.viewerState='fallback';}return false; }
     },
     snapshot(target) {
       if (!loaded || disposed) return null;
@@ -299,6 +302,6 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
       }
       if (loaded) invalidate();
     },
-    getState() { return { disposed, loaded, expanded, frames: frameCount, rendering: Boolean(frame), speed, rotation: spin?.rotation.y, fittedDistance, cameraDistance: camera?.position.length(), flight: flight ? { x:flight.x, y:flight.y, scale:flight.scale } : null, distance: controls?.getDistance(), azimuth: controls?.getAzimuthalAngle(), polar: controls?.getPolarAngle(), minDistance: controls?.minDistance, maxDistance: controls?.maxDistance, transition: transitionFrame ? { ...transitionFrame } : null }; },
+    getState() { return { disposed, loaded, interacting, lastInteraction, expanded, frames: frameCount, rendering: Boolean(frame), speed, rotation: spin?.rotation.y, fittedDistance, cameraDistance: camera?.position.length(), flight: flight ? { x:flight.x, y:flight.y, scale:flight.scale } : null, distance: controls?.getDistance(), azimuth: controls?.getAzimuthalAngle(), polar: controls?.getPolarAngle(), minDistance: controls?.minDistance, maxDistance: controls?.maxDistance, transition: transitionFrame ? { ...transitionFrame } : null }; },
   };
 }

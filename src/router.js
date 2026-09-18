@@ -1,4 +1,6 @@
 import { getLanguage } from './features/i18n/i18n.js';
+import { authService } from './services/auth.service.js';
+import { mountAuth } from './features/auth/auth.js';
 import { routes } from './config/routes.js';
 import { homePage } from './pages/home/home.js';
 import { renderNavbar } from './components/navbar/navbar.js';
@@ -8,6 +10,14 @@ import { animateToCatalog, cancelCatalogNavigation } from './modules/catalog-nav
 let disposePage = () => {}, currentPage, navigation = 0;
 export async function navigateToSection({ focus = true, cinematic = false } = {}) {
   const request = ++navigation;
+  if(!await authService.getCurrentUser()){
+    if(request!==navigation)return;
+    if(currentPage==='auth')return;
+    disposePage();currentPage='auth';closeProductModal();cancelCatalogNavigation();
+    document.querySelector('#header').replaceChildren();document.querySelector('#footer').replaceChildren();
+    disposePage=mountAuth(document.querySelector('#main'),()=>{disposePage();currentPage=null;return renderRoute();});return;
+  }
+  if(request!==navigation)return;
   document.dispatchEvent(new Event('navigationstart'));
   const path = location.hash.slice(1).split('?')[0] || '/home';
   const account = /^\/account(?:\/|$)/.test(path);
@@ -45,7 +55,7 @@ export async function navigateToSection({ focus = true, cinematic = false } = {}
       return;
     }
   }
-  document.title = admin ? 'Administración · UniNorte' : account ? 'Mi cuenta · UniNorte' : 'UniNorte · Tierra & Origen';
+  document.title = admin ? 'Administración · GlobalizaT' : account ? 'Mi cuenta · GlobalizaT' : 'GlobalizaT · Tierra & Origen';
   if (mounted && cinematic && !account && !admin) {
     // El nuevo hero mide su sticky antes de calcular el recorrido hacia Catálogo.
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -57,6 +67,7 @@ export async function navigateToSection({ focus = true, cinematic = false } = {}
 }
 export async function renderRoute() {
   document.documentElement.lang = getLanguage();
+  if(!await authService.getCurrentUser())return navigateToSection();
   renderNavbar(document.querySelector('#header'));
   renderFooter(document.querySelector('#footer'));
   await navigateToSection({ focus: Boolean(location.hash) });

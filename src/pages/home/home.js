@@ -6,6 +6,6 @@ export async function homePage() {
   const heroProduct = products.find(product => product.heroFeatured && product.model) || products.find(product => product.model) || products.find(product => product.featured) || products[0];
   return {
     html: `${heroProduct ? hero(heroProduct) : ''}${catalogSection(products)}`,
-    mount(root) { const disposeCatalog = mountCatalog(root, products); const disposeHero = mountHero(root, heroProduct); return () => { disposeCatalog(); disposeHero(); }; },
+    mount(root) { const disposeCatalog = mountCatalog(root, products); const disposeHero = mountHero(root, heroProduct, products); return () => { disposeCatalog(); disposeHero(); }; },
   };
 }

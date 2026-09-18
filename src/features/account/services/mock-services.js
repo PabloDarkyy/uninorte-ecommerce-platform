@@ -149,5 +149,5 @@ export function createMockAccountServices(repository, productService) {
       return preferences;
     },
   };
-  return { userService, addressService, orderService, trackingService, preferenceService };
+  return { userService, addressService, orderService, trackingService, preferenceService, resetSession(){visit=0;snapshots.clear();} };
 }

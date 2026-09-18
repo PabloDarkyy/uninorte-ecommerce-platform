@@ -7,7 +7,7 @@ const fs = require('node:fs');
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' });
     const errors = [], external = [], requested = [];
-    page.on('pageerror', error => errors.push(error.message));
+    require('./demo-login.cjs')(page);page.on('pageerror', error => errors.push(error.message));
     page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
     await page.route('**/*', route => {
       const url = new URL(route.request().url());

@@ -10,7 +10,7 @@ export function productStage(product, { context = 'card' } = {}) {
     <div class="stage-orbit" aria-hidden="true"></div><div class="stage-halo" aria-hidden="true"></div>
     <span class="stage-leaf stage-leaf--one" aria-hidden="true"></span><span class="stage-leaf stage-leaf--two" aria-hidden="true"></span><div class="stage-shadow" aria-hidden="true"></div>
     <div class="model-mount" data-model-mount data-product-id="${e(product.id)}" role="img" aria-label="Placeholder conceptual de ${e(displayText(product.name))}. Modelo 3D pendiente.">
-      ${product.image ? `<img class="stage-product-image" src="${e(product.image)}" alt="${e(displayText(product.name))}">` : ''}<div class="concept-product" aria-hidden="true" ${product.image ? 'hidden' : ''}><div class="concept-cap"></div><div class="concept-body"><div class="concept-label"><span class="concept-brand">UNINORTE</span>${icon('leaf')}<strong>${e(displayText(product.name))}</strong><span class="concept-origin">TIERRA & ORIGEN</span></div></div></div>
+      ${product.image ? `<img class="stage-product-image" src="${e(product.image)}" alt="${e(displayText(product.name))}">` : ''}<div class="concept-product" aria-hidden="true" ${product.image ? 'hidden' : ''}><div class="concept-cap"></div><div class="concept-body"><div class="concept-label"><span class="concept-brand">GLOBALIZAT</span>${icon('leaf')}<strong>${e(displayText(product.name))}</strong><span class="concept-origin">TIERRA & ORIGEN</span></div></div></div>
     </div><span class="stage-caption">${context === 'hero' ? `${icon('cube')} Espacio para modelo 3D` : 'Presentación conceptual'}</span>
   </div>`;
 }
@@ -20,7 +20,7 @@ export function mountProductStage(root, product, { context = 'modal', resources,
   let viewer, disposed = false, progress = 0, transitionLayout, transitionFrame;
   const controller = {
     snapshot(target) { return viewer?.snapshot(target); },
-    async setModel(url) { if(viewer)return viewer.setModel(url);if(!url || disposed)return false;return start(url); },
+    async setModel(url,options) { if(viewer)return viewer.setModel(url,options);if(!url || disposed)return false;return start(url); },
     getState() { return viewer?.getState(); },
     setFlightFrame(value) { viewer?.setFlightFrame(value); },
     finishFlight() { viewer?.finishFlight(); },

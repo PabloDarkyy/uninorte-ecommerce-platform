@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 (async () => {
  const browser = await chromium.launch({channel:'msedge',headless:true});
  const page = await browser.newPage({viewport:{width:1440,height:1050}}); const errors=[], external=[];
- page.on('pageerror',e=>errors.push(e.message)); page.on('request',r=>{if(/^https?:/.test(r.url())&&!r.url().startsWith('http://127.0.0.1:4173'))external.push(r.url());});
+ require('./demo-login.cjs')(page);page.on('pageerror',e=>errors.push(e.message)); page.on('request',r=>{if(/^https?:/.test(r.url())&&!r.url().startsWith('http://127.0.0.1:4173'))external.push(r.url());});
  const go=async section=>{await page.evaluate(s=>location.hash='/admin/'+s,section);await page.locator('.admin-sidebar nav a[aria-current]').filter({hasText:{dashboard:'Dashboard',products:'Productos',sales:'Ventas',orders:'Pedidos',inventory:'Inventario'}[section]}).waitFor();};
  try {
   await page.goto('http://127.0.0.1:4173/#/admin'); await page.locator('[data-snapshot]').waitFor();

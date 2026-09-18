@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
   const browser = await chromium.launch({ headless: true, channel: process.env.BROWSER_CHANNEL || 'msedge' });
   try {
     const page = await browser.newPage();
-    await page.goto('http://127.0.0.1:4173');
+    require('./demo-login.cjs')(page);await page.goto('http://127.0.0.1:4173');
     const result = await page.evaluate(async () => {
       const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
       const { tuneStudioGlass } = await import('/src/modules/three/studio-environment.js');

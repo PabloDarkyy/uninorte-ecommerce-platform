@@ -1,3 +1,4 @@
+import { en as experience } from './experience.js';
 import { en as commerce } from './commerce.js';
 export default {
   home: 'Home', catalog: 'Catalog', about: 'About us', contact: 'Contact', cart: 'Cart', profile: 'Profile', login: 'Sign in', register: 'Register', orders: 'Orders', admin: 'Administration',
@@ -12,4 +13,5 @@ export default {
   dashboard: 'Dashboard', products: 'Products', inventory: 'Stock', adminNotice: 'Demo layout. No CRUD or real access control.',
   platform: 'University platform', platformText: 'UniNorte academic project.', brands: 'Companies and brands', academic: 'Academic information pending', contactText: 'Contact channels pending confirmation.', aboutText: 'Space reserved for the project and participating groups.', navigation: 'Navigation', skip: 'Skip to content',
   ...commerce,
+  ...experience,
 };

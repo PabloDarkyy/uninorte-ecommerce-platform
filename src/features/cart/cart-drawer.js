@@ -16,7 +16,7 @@ async function buildCart({defer=false,itemId}={}) {
   if(current)return current;
   const trigger=document.activeElement, dialog=document.createElement('dialog'), abort=new AbortController();
   dialog.className='cart-drawer';dialog.setAttribute('aria-labelledby','cart-title');
-  dialog.innerHTML=`<section class="cart-panel"><header><div><p class="eyebrow">UNINORTE</p><h2 id="cart-title"></h2></div><button class="icon-button" data-close>×</button></header><div class="cart-items"></div><p role="alert" class="commerce-error"></p><footer class="cart-footer"></footer></section>`;
+  dialog.innerHTML=`<section class="cart-panel"><header><div><p class="eyebrow">GLOBALIZAT</p><h2 id="cart-title"></h2></div><button class="icon-button" data-close>×</button></header><div class="cart-items"></div><p role="alert" class="commerce-error"></p><footer class="cart-footer"></footer></section>`;
   let disposed=false,animation,renderId=0,working=false;
   const resize=new ResizeObserver(()=>fitPreviews());
   function fitPreviews(){for(const row of dialog.querySelectorAll('[data-item-id]')){const preview=previews.get(row.dataset.itemId),target=row.querySelector('[data-cart-preview]'),node=target.querySelector('[data-snapshot]');if(!preview||!node)continue;const rect=target.getBoundingClientRect();node.style.transform=`translate(-50%,-50%) scale(${Math.min(rect.width/preview.rect.width,rect.height/preview.rect.height)})`;}}

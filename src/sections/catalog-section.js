@@ -3,7 +3,7 @@ import { t } from '../features/i18n/i18n.js';
 import { motionOptions } from '../modules/ui-motion.js';
 import { productCard } from '../components/product-card/product-card.js';
 import { openProductModal } from '../components/product-modal/product-modal.js';
-export const catalogSection = products => `<section class="catalog-section" id="catalog" aria-labelledby="catalog-title" tabindex="-1"><div class="section-heading"><div><p class="eyebrow">DE NUESTRA TIERRA</p><h2 id="catalog-title">Nuestros productos<span>.</span></h2></div><p>Una colección, un mismo origen.<br>Conoce la colección de UniNorte.</p></div><div class="product-grid">${products.map(productCard).join('')}</div><p class="catalog-note">Colección académica · Imágenes conceptuales, precios y existencias de demostración.</p></section>`;
+export const catalogSection = products => `<section class="catalog-section" id="catalog" aria-labelledby="catalog-title" tabindex="-1"><div class="section-heading"><div><p class="eyebrow">DE NUESTRA TIERRA</p><h2 id="catalog-title">Nuestros productos<span>.</span></h2></div><p>Una colección, un mismo origen.<br>Conoce la colección de GlobalizaT.</p></div><div class="product-grid">${products.map(productCard).join('')}</div><p class="catalog-note">Colección académica · Imágenes conceptuales, precios y existencias de demostración.</p></section>`;
 export function mountCatalog(root, products) {
   const abort = new AbortController(); let animation, pending = false, previews, navigation = 0;
   const previewsReady=import('../components/product-preview/product-preview.js').then(module=>{if(!abort.signal.aborted)previews=module.mountCatalogPreviews(root,products);}).catch(()=>{});

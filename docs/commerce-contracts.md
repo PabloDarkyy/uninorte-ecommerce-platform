@@ -82,3 +82,8 @@ Sustituir las implementaciones mock manteniendo las fronteras de servicios. Acor
 - Pruebas existentes de catálogo, fullscreen, Account y Admin para regresiones; recursos locales sin CDN.
 
 - `tests/commerce-edge.cjs`: cancelación durante el vuelo, doble apertura, stock modificado, pago cancelado y miniaturas/scroll a 320 px.
+## Confirmación visual del pago ficticio
+
+`features/checkout/payment-feedback.js` presenta un indicador de carga mientras `CheckoutService.confirm` confirma el pedido simulado. Solo muestra el check verde después de una confirmación correcta; después aparece el resumen existente. Respeta movimiento reducido y elimina sus temporizadores al finalizar. No contacta pasarelas de pago ni almacena datos de tarjeta.
+
+Los pedidos se guardan en el repositorio local de la cuenta activa; consultar [acceso local](auth-contracts.md). La cuenta demo mantiene los pedidos semilla; las cuentas nuevas comienzan con historial vacío.

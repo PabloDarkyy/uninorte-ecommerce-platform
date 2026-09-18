@@ -1,7 +1,7 @@
 const{chromium}=require(process.env.PLAYWRIGHT_PATH||'playwright');const assert=require('node:assert/strict');const fs=require('node:fs');
 (async()=>{const browser=await chromium.launch({channel:'msedge',headless:true});try{
  const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[],requests=[];
- page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.url().includes('.glb'))requests.push(r.url());});
+ require('./demo-login.cjs')(page);page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.url().includes('.glb'))requests.push(r.url());});
  await page.addInitScript(()=>{window.gpu={created:0,live:0,max:0,draws:0};const seen=new WeakSet(),original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){const ctx=original.call(this,type,...args);if(type.startsWith('webgl')&&ctx&&!seen.has(ctx)){seen.add(ctx);gpu.created++;gpu.live++;gpu.max=Math.max(gpu.max,gpu.live);this.addEventListener('webglcontextlost',()=>gpu.live--,{once:true});}return ctx;};for(const method of ['drawElements','drawArrays','drawElementsInstanced','drawArraysInstanced']){const original=WebGL2RenderingContext.prototype[method];WebGL2RenderingContext.prototype[method]=function(...args){gpu.draws++;return original.apply(this,args);};}});
  await page.goto('http://127.0.0.1:4173/');await page.waitForFunction(()=>document.querySelector('.hero [data-viewer-state=ready]'));
  assert.equal(await page.locator('.catalog-model-preview').count(),0,'GLBs below viewport remain lazy');assert.equal(await page.evaluate(()=>gpu.created),1);

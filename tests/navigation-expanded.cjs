@@ -8,7 +8,7 @@ const base = 'http://127.0.0.1:4173';
     const errors = [], models = [];
     page.on('pageerror', error => errors.push(error.message));
     page.on('request', request => { if (request.url().endsWith('.glb')) models.push(request.url()); });
-    await page.goto(base);
+    require('./demo-login.cjs')(page);await page.goto(base);
     await page.waitForFunction(() => document.querySelector('.hero [data-viewer-state="ready"]'));
     const catalog = page.locator('#header nav a[href="#/catalog"]');
     await catalog.click();

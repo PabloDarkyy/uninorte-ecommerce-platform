@@ -69,3 +69,8 @@ Sin GLB se utiliza la imagen o representación conceptual como elemento comparti
 - Regresiones del Hero, visor, Cuenta y Administración. La prueba visual del Hero admite únicamente diferencias de cuantización de 1/255 en menos del 0,1 % de los canales; esa diferencia también se reproduce con el visor previo y el GLB actual.
 
 La fluidez depende del dispositivo, resolución y complejidad de los GLB. El diseño evita trabajo continuo del catálogo, pero no garantiza 60 FPS para cualquier archivo o hardware.
+## Rotación automática del Hero
+
+`components/hero/hero-rotation.js` recorre los productos con modelos distintos de ProductService cada 8 segundos de inactividad. Reutiliza el visor y la caché existentes, sin crear otro renderer. Precarga el siguiente modelo antes de un cambio breve de opacidad.
+
+Scroll, resize, interacción del puntero/teclado, un modal abierto o una pestaña oculta posponen el cambio. El cambio automático se desactiva con movimiento reducido y mientras el Hero está en su transición de scroll. Los temporizadores, animaciones y listeners se eliminan al desmontar la vista. `setModel` comprueba que el cambio siga permitido antes y después del fade; conserva el modelo anterior si falla la carga.

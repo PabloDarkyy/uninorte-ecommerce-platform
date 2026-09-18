@@ -1,4 +1,6 @@
-# UniNorte E-Commerce Platform
+# GT · GlobalizaT
+
+**GlobalizaT: Tecnología y Comercio para Conectar con el Mundo.**
 
 Proyecto universitario de plataforma web e-commerce de UniNorte, orientado a presentar productos paraguayos y preparar el trabajo colaborativo entre Frontend, Backend y Base de Datos.
 
@@ -8,7 +10,8 @@ Este repositorio contiene el estado actual del **Frontend**. Funciona con datos 
 
 Frontend funcional con:
 
-- **Home:** presentación de la colección y transición cinematográfica por scroll.
+- **Acceso:** registro e inicio de sesión locales; cada nueva carga exige ingresar nuevamente.
+- **Home:** presentación de la colección, transición cinematográfica por scroll y modelos que cambian tras 8 segundos sin interacción ni scroll.
 - **Catálogo y detalle de productos:** previews de los GLB reales renderizados bajo demanda y transición compartida hasta el visor; imagen o representación conceptual de respaldo. Información y modales accesibles.
 - **Visualización 3D:** modelos GLB locales, controles de giro/zoom y visor ampliado.
 - **Perfil:** edición de datos, avatar, direcciones y preferencias locales.
@@ -22,11 +25,11 @@ Frontend funcional con:
 
 - Carrito lateral con variantes, cantidades, stock, eliminación y resumen.
 - Añadir al carrito y Comprar ahora con captura del modelo visible y transición coordinada.
-- Checkout de cinco pasos, pago completamente ficticio y confirmación integrada con Perfil/Tracking.
+- Checkout de cinco pasos, pago completamente ficticio con indicador de carga y check verde, y confirmación integrada con Perfil/Tracking.
 - Selectores ES/EN y PYG/USD/EUR activos para Commerce; los pedidos conservan moneda y precios históricos.
 - GLB por variante y selección desde Admin, reutilizando caché, renderer y entorno.
 
-El carrito vive en memoria durante la sesión. Los datos de tarjeta nunca se guardan. No hay pagos reales, Backend, autenticación ni base de datos. Account/Admin conservan los textos previos fuera del flujo Commerce.
+El carrito vive en memoria durante la sesión. Los datos de tarjeta nunca se guardan. No hay pagos reales, Backend, autenticación de servidor ni base de datos. Account/Admin conservan los textos previos fuera del flujo Commerce.
 
 ## Tecnologías
 
@@ -53,6 +56,8 @@ También se puede usar `node scripts/serve.js`.
 4. Abrir **http://127.0.0.1:4173/**. Detener el servidor con `Ctrl+C`.
 
 No hace falta ejecutar `npm install`. No abrir `index.html` con doble clic: los módulos y modelos necesitan HTTP. Si el puerto 4173 está ocupado, detener la instancia anterior antes de iniciar otra.
+
+Al abrir la aplicación, crear una cuenta local o usar **Entrar con cuenta de demostración**. Las cuentas registradas existen únicamente en ese navegador; la sesión no se restaura al recargar. Para pruebas, utilizar datos ficticios. Ver [contrato de acceso local](docs/auth-contracts.md).
 
 Accesos de la demo:
 
@@ -81,6 +86,7 @@ src/
   sections/               Secciones de la tienda
   components/             Navbar, Hero, tarjetas, modales y visor compartido
   features/
+    auth/                 Pantalla de acceso y registro local
     checkout/             Flujo de compra simulado
     account/              Perfil, direcciones, preferencias, pedidos y tracking
     admin/                Dashboard, productos, inventario, pedidos y ventas
@@ -122,6 +128,7 @@ Base de Datos futura
 
 Puntos principales:
 
+- Acceso local: `src/services/auth.service.js`.
 - Productos: `src/services/product.service.js` y `src/services/products/`.
 - Cuenta y pedidos: `src/features/account/services/index.js`.
 - Administración: `src/features/admin/services.js`, que reutiliza productos y pedidos.
@@ -133,6 +140,7 @@ Los equipos deberán acordar persistencia, autenticación/autorización, archivo
 
 Documentación de integración:
 
+- [Acceso local, sesiones y separación de cuentas](docs/auth-contracts.md).
 - [Carrito, checkout, pedidos y variantes 3D](docs/commerce-contracts.md).
 - [Previews 3D, caché y transición compartida de productos](docs/catalog-3d-transition.md).
 - [Account / Profile y contratos de Cuenta](docs/account-contracts.md).
@@ -152,6 +160,8 @@ Con el servidor iniciado, Playwright externo y Edge disponibles, se pueden ejecu
 
 ```sh
 node tests/browser-smoke.cjs
+node tests/experience-browser.cjs
+node tests/commerce-browser.cjs
 node tests/account-browser.cjs
 node tests/admin-browser.cjs
 node tests/admin-edge.cjs

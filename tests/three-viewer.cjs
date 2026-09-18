@@ -17,7 +17,7 @@ const fixture = `<!doctype html><html><head><script type="importmap">{"imports":
       if (new URL(route.request().url()).origin !== base) { external.push(route.request().url()); return route.abort(); }
       return route.continue();
     });
-    await page.goto(base);
+    require('./demo-login.cjs')(page);await page.goto(base);
     await page.waitForFunction(() => document.querySelector('.hero [data-viewer-state="ready"]'));
     assert.equal(await page.locator('canvas.product-canvas').count(), 1);
     assert.equal(await page.locator('.exhibit-topline').count(), 0);
@@ -159,7 +159,7 @@ const fixture = `<!doctype html><html><head><script type="importmap">{"imports":
     const fallbackErrors = [];
     fallback.on('pageerror', error => fallbackErrors.push(error.message));
     await fallback.route('**/*.glb', route => route.fulfill({ status: 404, body: 'Missing' }));
-    await fallback.goto(base);
+    require('./demo-login.cjs')(fallback);await fallback.goto(base);
     await fallback.waitForFunction(() => document.querySelector('.hero [data-viewer-state="fallback"]'));
     assert.ok(await fallback.locator('.hero .concept-product').isVisible());
     await fallback.locator('[data-product-preview="licor"]').click();
@@ -173,7 +173,7 @@ const fixture = `<!doctype html><html><head><script type="importmap">{"imports":
       const original = HTMLCanvasElement.prototype.getContext;
       HTMLCanvasElement.prototype.getContext = function (type, ...args) { return type.startsWith('webgl') ? null : original.call(this, type, ...args); };
     });
-    await noWebGL.goto(base);
+    require('./demo-login.cjs')(noWebGL);await noWebGL.goto(base);
     await noWebGL.waitForFunction(() => document.querySelector('.hero [data-viewer-state="fallback"]'));
     assert.ok(await noWebGL.locator('.hero .concept-product').isVisible());
     assert.equal(await noWebGL.locator('.product-card').count(), 6);

@@ -29,7 +29,7 @@ const base = 'http://127.0.0.1:4173';
     };
     for (const [width, height] of [[375,812], [768,1024], [1440,1000]]) {
       await page.setViewportSize({ width, height });
-      await page.goto(base);
+      require('./demo-login.cjs')(page);await page.goto(base);
       await page.waitForFunction(() => document.querySelector('.hero [data-viewer-state="ready"]'));
       await page.waitForTimeout(150);
       assert.equal(await page.locator('.hero-scroll-debug').count(), 0);

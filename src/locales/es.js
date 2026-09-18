@@ -1,3 +1,4 @@
+import { es as experience } from './experience.js';
 import { es as commerce } from './commerce.js';
 export default {
   home: 'Inicio', catalog: 'Catálogo', about: 'Nosotros', contact: 'Contacto', cart: 'Carrito', profile: 'Perfil', login: 'Ingresar', register: 'Registro', orders: 'Pedidos', admin: 'Administración',
@@ -12,4 +13,5 @@ export default {
   dashboard: 'Dashboard', products: 'Productos', inventory: 'Stock', adminNotice: 'Layout de demostración. Sin CRUD ni control de acceso real.',
   platform: 'Plataforma universitaria', platformText: 'Proyecto académico UniNorte.', brands: 'Empresas y marcas', academic: 'Información académica pendiente', contactText: 'Canales de contacto pendientes de confirmación.', aboutText: 'Espacio reservado para la presentación del proyecto y los grupos participantes.', navigation: 'Navegación', skip: 'Saltar al contenido',
   ...commerce,
+  ...experience,
 };
