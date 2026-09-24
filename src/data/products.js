@@ -1,7 +1,7 @@
 // Datos académicos: precios, stock y presentaciones de ejemplo, sin valor comercial.
 const entries = [
   ['mani', 'Maní', 'Peanuts', 'Alimentos', 'Food', '#A36B43'],
-  ['miel', 'Miel de abeja', 'Bee honey', 'Alimentos', 'Food', '#C89535'],
+  ['miel', 'Miel de abeja', 'Bee honey', 'Alimentos', 'Food', '#C89535', './src/assets/models/miel.glb'],
   ['harina', 'Harina de trigo', 'Wheat flour', 'Alimentos', 'Food', '#C0A77A'],//faltan agregar las variantes(son tres variantes), los modelos ya estan en la carpeta correspondiente
   ['petitgrain', 'Esencia de petitgrain', 'Petitgrain essence', 'Esencias', 'Essences', '#719B65', './src/assets/models/petitgrain.glb', true],
   ['licor', 'Licor de mandioca', 'Cassava liqueur', 'Bebidas', 'Drinks', '#AF7545', './src/assets/models/licor-mandioca.glb', true],
