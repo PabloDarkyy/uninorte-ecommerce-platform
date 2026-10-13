@@ -25,15 +25,34 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - name: Verify contracts
+      - name: Verify frontend contracts
         run: npm test
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Prepare static frontend
+      - name: Prepare frontend and configure public API URL
+        env:
+          GLOBALIZAT_API_URL: ${{ vars.GLOBALIZAT_API_URL }}
         run: |
+          if [ -z "$GLOBALIZAT_API_URL" ]; then
+            echo "::error::Define la variable de repositorio GLOBALIZAT_API_URL con la URL pública del Backend antes de desplegar."
+            exit 1
+          fi
           mkdir -p dist
           cp index.html dist/
           cp -R src dist/src
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          dist = Path('dist')
+          api_url = json.dumps(os.environ['GLOBALIZAT_API_URL'].rstrip('/'))
+          (dist / 'api-config.js').write_text("window.__GLOBALIZAT_API_URL__ = " + api_url + ";\n", encoding='utf-8')
+          page = dist / 'index.html'
+          html = page.read_text(encoding='utf-8')
+          if '</head>' not in html:
+              raise SystemExit('No se encontró </head> en index.html')
+          html = html.replace('</head>', '  <script src="./api-config.js"></script>\n</head>', 1)
+          page.write_text(html, encoding='utf-8')
+          PY
           touch dist/.nojekyll
       - name: Upload frontend
         uses: actions/upload-pages-artifact@v4
