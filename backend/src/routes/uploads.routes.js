@@ -29,9 +29,18 @@ export function registerUploadRoutes(router, { store, uploadsDir, publicUploadsP
   });
   router.post('/api/uploads/release', requireAuth(store), requireAdmin(), async ctx => {
     const url = String(ctx.body?.url || '');
-    if (url.startsWith(`${publicUploadsPath}/`)) {
-      const relative = url.slice(publicUploadsPath.length + 1); const target = path.resolve(uploadsDir, relative); const inside = path.relative(path.resolve(uploadsDir), target);
-      if (!inside.startsWith('..') && !path.isAbsolute(inside)) { try { await unlink(target); } catch { /* ya no existe */ } await store.releaseMedia(url); }
+    let pathname = url;
+    if (/^https?:\/\//i.test(url)) {
+      try { pathname = new URL(url).pathname; } catch { pathname = ''; }
+    }
+    if (pathname.startsWith(`${publicUploadsPath}/`)) {
+      const relative = pathname.slice(publicUploadsPath.length + 1);
+      const target = path.resolve(uploadsDir, relative);
+      const inside = path.relative(path.resolve(uploadsDir), target);
+      if (!inside.startsWith('..') && !path.isAbsolute(inside)) {
+        try { await unlink(target); } catch { /* ya no existe */ }
+        await store.releaseMedia(url);
+      }
     }
     sendJson(ctx.response, 200, {});
   });
