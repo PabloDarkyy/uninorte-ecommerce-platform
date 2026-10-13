@@ -9,7 +9,7 @@ node_modules/
 /test-results/
 /playwright-report/
 
-# Configuración local y secretos (los ejemplos sin credenciales sí se versionan)
+# Configuración local y secretos
 .env
 .env.*
 !.env.example
@@ -22,4 +22,8 @@ node_modules/
 Thumbs.db
 Desktop.ini
 
-# src/vendor/three/build/ es una dependencia de ejecución y DEBE versionarse.
+# Archivos generados por el Backend
+backend/data/store.json
+backend/data/store.json.tmp
+backend/uploads/**
+!backend/uploads/.gitkeep
