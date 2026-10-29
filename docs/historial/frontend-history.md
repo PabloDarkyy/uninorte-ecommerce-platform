@@ -20,7 +20,7 @@ Abrir http://127.0.0.1:4173 y detener con Ctrl+C. No ejecutar `npm install`. El 
 
 ## Arquitectura
 
-La fase de **Cuenta del cliente** está disponible desde Perfil en el navbar o `#/account`. Incluye resumen, edición de perfil y avatar local, seguimiento simulado, historial, direcciones y preferencias. Su arquitectura, estructuras de datos y operaciones sugeridas para Backend están documentadas en [docs/account-contracts.md](docs/account-contracts.md). El punto único para sustituir los mocks es `src/features/account/services/index.js`.
+La fase de **Cuenta del cliente** está disponible desde Perfil en el navbar o `#/account`. Incluye resumen, edición de perfil y avatar local, seguimiento simulado, historial, direcciones y preferencias. Su arquitectura, estructuras de datos y operaciones sugeridas para Backend están documentadas en [account-contracts.md](../contratos/account-contracts.md). El punto único para sustituir los mocks es `src/features/account/services/index.js`.
 
 ```text
 src/app.js, router.js        Inicio, secciones y desmontaje de la vista
@@ -181,5 +181,5 @@ Referencias oficiales: [OrbitControls](https://threejs.org/docs/pages/OrbitContr
 
 Acceso desde Administración en el pie de la tienda o en http://127.0.0.1:4173/#/admin. Incluye Dashboard, Productos, Ventas, Pedidos e Inventario. Los cambios de productos comparten la colección del catálogo durante la sesión; recargar restaura la demo. Gráficos locales, archivos temporales y servicios reemplazables.
 
-Contratos y alcance: [Administración](docs/admin-contracts.md).
+Contratos y alcance: [Administración](../contratos/admin-contracts.md).
 
