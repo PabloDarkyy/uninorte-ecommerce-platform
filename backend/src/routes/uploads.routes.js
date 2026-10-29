@@ -52,7 +52,10 @@ export function registerUploadRoutes(router, { store, uploadsDir, publicUploadsP
   });
 
   router.post('/api/uploads/release', requireAuth(store), requireAdmin(), async ctx => {
-    const url = String(ctx.body?.url || '');
+    let url = String(ctx.body?.url || '');
+    if (/^https?:\/\//i.test(url)) {
+      try { url = new URL(url).pathname; } catch { /* se ignora una URL absoluta inválida */ }
+    }
     if (url.startsWith(`${publicUploadsPath}/`)) {
       const relative = url.slice(publicUploadsPath.length + 1);
       const target = path.resolve(uploadsDir, relative);

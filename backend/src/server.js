@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { config } from './config.js';
+import { config, assertProductionConfig } from './config.js';
 import { createStore } from './lib/store.js';
 import { createRouter } from './lib/router.js';
 import { HttpError, sendJson, applyCors, readJsonBody, isMultipart } from './lib/http.js';
@@ -79,7 +79,9 @@ export async function createApp(overrides = {}) {
     if (request.method === 'OPTIONS') { response.writeHead(204); response.end(); return; }
 
     const url = new URL(request.url, 'http://localhost');
-    const pathname = decodeURIComponent(url.pathname);
+    let pathname;
+    try { pathname = decodeURIComponent(url.pathname); }
+    catch { sendJson(response, 400, { error: 'La URL de la solicitud no es válida.', code: 'BAD_REQUEST' }); return; }
 
     if (pathname.startsWith(`${PUBLIC_UPLOADS_PATH}/`)) return serveUpload(pathname, runtimeConfig.uploadsDir, response);
 
@@ -100,6 +102,7 @@ export async function createApp(overrides = {}) {
 }
 
 async function main() {
+  assertProductionConfig(config);
   const { server, store } = await createApp();
   server.listen(config.port, () => {
     console.log(`GlobalizaT backend: http://127.0.0.1:${config.port}`);

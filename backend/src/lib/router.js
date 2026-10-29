@@ -1,3 +1,5 @@
+import { HttpError } from './http.js';
+
 export function createRouter() {
   const routes = [];
 
@@ -29,7 +31,8 @@ export function createRouter() {
         if (!match) continue;
         if (route.method !== method) { pathMatched = true; continue; }
         const params = {};
-        route.paramNames.forEach((name, i) => { params[name] = decodeURIComponent(match[i + 1]); });
+        try { route.paramNames.forEach((name, i) => { params[name] = decodeURIComponent(match[i + 1]); }); }
+        catch { throw new HttpError(400, 'La URL de la solicitud no es válida.', 'BAD_REQUEST'); }
         ctx.params = params;
         let index = -1;
         const run = async () => {

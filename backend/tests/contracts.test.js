@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { createApp } from '../src/server.js';
@@ -47,6 +47,33 @@ async function call(base, method, url, { token, body } = {}) {
   const json = text ? JSON.parse(text) : null;
   return { status: response.status, json };
 }
+
+test('URLs malformadas responden 400 sin detener el servidor', async () => {
+  await withServer(async base => {
+    const root = await call(base, 'GET', '/%E0');
+    assert.equal(root.status, 400);
+    assert.equal(root.json.code, 'BAD_REQUEST');
+    const parameter = await call(base, 'GET', '/api/products/%E0');
+    assert.equal(parameter.status, 400);
+    assert.equal(parameter.json.code, 'BAD_REQUEST');
+    const health = await call(base, 'GET', '/api/health');
+    assert.equal(health.status, 200);
+  });
+});
+
+test('release no permite escapar de uploads con una URL absoluta', async () => {
+  await withServer(async (base, config) => {
+    const outside = path.join(path.dirname(config.uploadsDir), 'outside.txt');
+    await writeFile(outside, 'conservar');
+    const admin = await call(base, 'POST', '/api/auth/login', { body: { email: config.seedAdminEmail, password: config.seedAdminPassword } });
+    const release = await call(base, 'POST', '/api/uploads/release', {
+      token: admin.json.token,
+      body: { url: 'https://example.com/uploads/../../outside.txt' },
+    });
+    assert.equal(release.status, 200);
+    assert.equal(await readFile(outside, 'utf8'), 'conservar');
+  });
+});
 
 test('registro, login y sesion', async () => {
   await withServer(async base => {

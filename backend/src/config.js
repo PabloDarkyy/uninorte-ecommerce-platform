@@ -23,7 +23,8 @@ function loadEnvFile(file) {
 const fileEnv = loadEnvFile(path.join(root, '.env'));
 const env = key => process.env[key] ?? fileEnv[key];
 
-const databaseUrl = env('DATABASE_URL') || 'postgresql://postgres:postgres@127.0.0.1:5432/globalizat';
+const defaultDatabaseUrl = 'postgresql://postgres:postgres@127.0.0.1:5432/globalizat';
+const databaseUrl = env('DATABASE_URL') || defaultDatabaseUrl;
 
 export const config = {
   root,
@@ -39,3 +40,13 @@ export const config = {
   seedAdminEmail: (env('SEED_ADMIN_EMAIL') || 'admin@globalizat.demo').toLowerCase(),
   seedAdminPassword: env('SEED_ADMIN_PASSWORD') || 'Admin12345!',
 };
+
+export function assertProductionConfig(candidate, nodeEnv = process.env.NODE_ENV) {
+  if (nodeEnv !== 'production') return;
+  const problems = [];
+  if (!candidate.databaseUrl || candidate.databaseUrl === defaultDatabaseUrl) problems.push('DATABASE_URL');
+  const password = String(candidate.seedAdminPassword || '');
+  if (!password || password === 'Admin12345!' || password.length < 12) problems.push('SEED_ADMIN_PASSWORD');
+  if (!candidate.corsOrigin || candidate.corsOrigin === '*') problems.push('CORS_ORIGIN');
+  if (problems.length) throw new Error(`Configuración de producción inválida: ${problems.join(', ')}.`);
+}
