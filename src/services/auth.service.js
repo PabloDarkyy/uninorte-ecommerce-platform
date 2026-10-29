@@ -1,9 +1,9 @@
 import { apiRequest, setApiToken } from './api.client.js';
+import { DEMO_MODE } from '../config/api.js';
 
 const KEY = 'globalizat.auth.demo.v1';
 
-// Factoría local conservada para pruebas unitarias del frontend y como referencia
-// de contrato. La instancia exportada usa el Backend real.
+// Factoría local para pruebas y para el modo demostración explícito de Pages.
 export function createAuthService(storage, onLogin = async () => {}) {
   let current = null;
   const read = () => {
@@ -98,4 +98,12 @@ export function createApiAuthService() {
   };
 }
 
-export const authService = createApiAuthService();
+let demoStorage;
+try { demoStorage = globalThis.localStorage; } catch { /* The demo can continue with in-memory account data. */ }
+const useMocks = typeof window === 'undefined' || DEMO_MODE;
+export const authService = useMocks
+  ? createAuthService(demoStorage, async user => {
+    const { activateAccount } = await import('../features/account/services/index.js');
+    activateAccount(user);
+  })
+  : createApiAuthService();

@@ -2,17 +2,19 @@ import { createMockAccountServices } from './mock-services.js';
 import { createAccountRepository } from './repository.js';
 import { productService } from '../../../services/product.service.js';
 import { createApiAccountServices } from './api-services.js';
+import { DEMO_MODE } from '../../../config/api.js';
 
-// La aplicación usa el proveedor HTTP/BD real. La factoría mock se conserva
-// para pruebas de UI y regresiones sin Backend.
+// El navegador usa HTTP salvo cuando Pages activa explícitamente la demostración.
 let storage;
 try { storage = globalThis.localStorage; } catch { /* memoria para pruebas sin navegador */ }
 const mockRepository = createAccountRepository(storage);
-export const accountServices = typeof window !== 'undefined' ? createApiAccountServices() : createMockAccountServices(mockRepository, productService);
+const useMocks = typeof window === 'undefined' || DEMO_MODE;
+export const accountServices = useMocks ? createMockAccountServices(mockRepository, productService) : createApiAccountServices();
 
 export function activateAccount(user) {
-  // Compatibilidad con el contrato anterior. La identidad ya la controla el token Bearer.
-  void user;
+  if (!useMocks) return;
+  mockRepository.activate(user);
+  accountServices.resetSession();
 }
 
 export { createMockAccountServices, createAccountRepository, productService };

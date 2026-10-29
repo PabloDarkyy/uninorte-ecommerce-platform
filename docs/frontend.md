@@ -55,7 +55,7 @@ En navegador se usan implementaciones reales:
 - `features/admin/services.js`: composición de servicios para administración.
 - `services/products/product-assets.js`: carga/liberación de imágenes y GLB.
 
-Las factorías mock (`createMockProductRepository`, `createMockAccountServices`, analytics mock y datos de `mocks/`) se conservan para pruebas ejecutadas en Node. La selección `typeof window !== 'undefined'` garantiza que la aplicación real en navegador use HTTP; no son el backend de la versión full-stack.
+`src/config/api.js` expone `DEMO_MODE`, que solo es verdadero cuando la configuración cargada antes de `app.js` define exactamente `globalThis.__GLOBALIZAT_DEMO__ = true`. En ese modo, o durante pruebas Node sin `window`, los singletons de autenticación, productos, cuenta, assets y administración seleccionan las factorías mock (`createMockProductRepository`, `createMockAccountServices` y analytics mock). En cualquier navegador sin esa bandera se mantienen los servicios HTTP, de modo que el flujo full-stack local no cambia. Los errores de red nunca activan automáticamente el modo demostración.
 
 ## Módulos 3D
 

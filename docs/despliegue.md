@@ -2,27 +2,16 @@
 
 ## Demo pública en GitHub Pages
 
-La URL pública es <https://pablodarkyy.github.io/uninorte-ecommerce-platform/>. Es una demo congelada solo frontend:
+La URL pública es <https://pablodarkyy.github.io/uninorte-ecommerce-platform/>. El workflow publica `index.html` y `src/` del checkout actual después de ejecutar `npm test`, por lo que Pages muestra el frontend vigente, incluido el modo oscuro.
 
-- fuente: tag `stable-pages-pre-fullstack`;
-- commit fijado: `db6e79c`;
-- datos: mocks locales;
-- backend/PostgreSQL: no disponibles.
+Durante la preparación de `dist/`, el workflow crea `runtime-config.js` y lo inyecta inmediatamente antes de `app.js`:
 
-`.github/workflows/pages.yml` se dispara con un push a `main` o manualmente. Primero prueba el commit de `main` con `npm test`, pero después hace un segundo checkout del tag en `pages-demo/`, copia únicamente `index.html` y `src/` a `dist/`, añade `.nojekyll` y despliega ese artefacto. Por ello, un push normal no cambia el contenido público mientras el tag no cambie.
+- si la variable de repositorio `GLOBALIZAT_API_URL` está definida, escribe `window.__GLOBALIZAT_API_URL__` con esa URL y la aplicación usa los servicios HTTP;
+- si no está definida, escribe `window.__GLOBALIZAT_DEMO__ = true` y activa explícitamente los mocks locales.
 
-### Actualizar deliberadamente la demo futura
+El modo demostración nunca se deduce de un fallo de red. Sus datos son ficticios y se guardan solo en el navegador; no representa conexiones, cuentas ni pagos reales. `index.html` no contiene configuración de despliegue y permanece válido para el entorno full-stack local.
 
-Antes de mover/recrear el tag se debe:
-
-1. preparar una revisión frontend autocontenida que funcione sin API;
-2. ejecutar las pruebas y el recorrido manual en servidor HTTP;
-3. revisar que no incluya secretos ni dependa de cargas locales;
-4. decidir y documentar el nuevo commit congelado;
-5. actualizar deliberadamente la referencia `stable-pages-pre-fullstack` según la política del repositorio;
-6. disparar el workflow y validar la URL publicada.
-
-Cambiar el tag altera el contenido público y debe tratarse como una decisión de release, no como parte automática de la integración full-stack.
+El tag `stable-pages-pre-fullstack` se conserva como punto de rollback. Si fuese necesario volver a la demo anterior, se puede desplegar deliberadamente ese tag según la política de releases del repositorio; el workflow normal no lo usa como fuente.
 
 ## Entrega full-stack local
 

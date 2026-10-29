@@ -27,7 +27,8 @@
 | Conversión PYG/USD/EUR | Simulada | Tasas fijas ficticias: 8 000 PYG/USD y 9 000 PYG/EUR. |
 | Seguimiento | Simulado | Escenario local de 15 etapas; no hay integración con transportistas. |
 | Analytics | Calculado sobre datos reales locales | Se deriva de productos/pedidos del store, pero la UI identifica la sesión/generación como demostrativa. |
-| Demo pública de Pages | Simulada y congelada | Frontend del tag `stable-pages-pre-fullstack`; usa mocks y no tiene backend. |
+| Modo demostración | Simulado y explícito | Solo se activa mediante `window.__GLOBALIZAT_DEMO__ = true`; usa mocks con datos ficticios guardados en el navegador y nunca simula conexiones ni pagos reales. |
+| Demo pública de Pages | Frontend actual | Publica el checkout vigente; usa el modo demostración cuando no se configura `GLOBALIZAT_API_URL`. |
 
 ## Seguridad y datos
 

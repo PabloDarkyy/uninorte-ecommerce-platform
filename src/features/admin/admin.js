@@ -4,6 +4,8 @@ import { e, icon, displayText } from './components/shared.js';
 import { openProductForm } from './components/product-form.js';
 import { openProductModal } from '../../components/product-modal/product-modal.js';
 import { createDialog } from '../../modules/ui-motion.js';
+import { DEMO_MODE } from '../../config/api.js';
+import { t } from '../i18n/i18n.js';
 const sections = [['dashboard','Dashboard','◈'],['products','Productos',icon('leaf')],['sales','Ventas','↗'],['orders','Pedidos','▤'],['inventory','Inventario','▦']];
 const introductions = { dashboard: ['Cada origen, una oportunidad.','Una mirada a tu colección y al movimiento de la tienda.'], products: ['Tu colección','Cuida los detalles de cada producto, desde su origen hasta su presentación.'], sales: ['El pulso de la tienda','Consulta ventas e inventario calculados desde la información del servidor.'], orders: ['Pedidos de la tienda','Toda la información de compra, reunida en un lugar.'], inventory: ['Cada unidad cuenta','Consulta y actualiza las existencias de tu colección.'] };
 export async function adminPage(path, services = adminServices) {
@@ -18,7 +20,7 @@ export async function adminPage(path, services = adminServices) {
   }
   const initial = await content();
   return {
-    html: `<section id="admin" class="admin" tabindex="-1" aria-labelledby="admin-title"><aside class="admin-sidebar"><a class="admin-identity" href="#/admin"><span>GT<span>·</span></span><strong>Estudio de origen<small>ADMINISTRACIÓN</small></strong></a><nav aria-label="Administración">${sections.map(([key,label,mark]) => `<a href="#/admin/${key}" ${key === current ? 'aria-current="page"' : ''}><span aria-hidden="true">${mark}</span>${label}</a>`).join('')}</nav><div class="admin-sidebar-bottom"><p>De nuestra tierra.<br>Hacia nuevos horizontes.</p><a href="#/catalog">← Volver a la tienda</a><small>Espacio de demostración</small></div></aside><div class="admin-main"><header class="admin-heading"><p class="eyebrow">GLOBALIZAT / ${sections.find(([key]) => key === current)[1]}</p><h1 id="admin-title">${introductions[current][0]}</h1><p>${introductions[current][1]}</p></header><p data-admin-notice class="admin-notice" role="status" tabindex="-1" hidden></p><div data-admin-content class="admin-content">${initial}</div></div></section>`,
+    html: `<section id="admin" class="admin" tabindex="-1" aria-labelledby="admin-title"><aside class="admin-sidebar"><a class="admin-identity" href="#/admin"><span>GT<span>·</span></span><strong>Estudio de origen<small>ADMINISTRACIÓN</small></strong></a><nav aria-label="Administración">${sections.map(([key,label,mark]) => `<a href="#/admin/${key}" ${key === current ? 'aria-current="page"' : ''}><span aria-hidden="true">${mark}</span>${label}</a>`).join('')}</nav><div class="admin-sidebar-bottom"><p>De nuestra tierra.<br>Hacia nuevos horizontes.</p><a href="#/catalog">← Volver a la tienda</a><small>Espacio de demostración</small></div></aside><div class="admin-main"><header class="admin-heading"><p class="eyebrow">GLOBALIZAT / ${sections.find(([key]) => key === current)[1]}</p>${DEMO_MODE ? `<span class="demo-mode-badge">${t('demoMode')}</span>` : ''}<h1 id="admin-title">${introductions[current][0]}</h1><p>${introductions[current][1]}</p></header><p data-admin-notice class="admin-notice" role="status" tabindex="-1" hidden></p><div data-admin-content class="admin-content">${initial}</div></div></section>`,
     mount(root) {
       const abort = new AbortController(); let disposed = false, revision = 0;
       const modals = new Set();

@@ -16,7 +16,7 @@
 | Esquema | No existe sistema de migraciones. | Cambios futuros requieren un plan manual para preservar datos. |
 | CSS | `base.css`, `components.css` y `layout.css` no son importados por `main.css`. | Son legado y pueden confundir mantenimiento o quedar desactualizados. |
 | Pruebas de navegador | `tests/*.cjs` requieren Playwright/Edge y son opcionales. | `npm test` no cubre los recorridos completos del navegador. |
-| Demo pública | Pages sirve un tag frontend congelado con mocks. | No permite evaluar la integración full-stack actual. |
+| Demo pública | Pages publica el frontend actual en modo demostración cuando no se configura una API. | Los datos quedan solo en el navegador y son ficticios; no evalúa una conexión, cuenta ni pago real. |
 | Producción | No hay hosting, backups, observabilidad, rate limiting, recuperación de cuenta ni MFA. | El sistema no está preparado para usuarios/datos reales. |
 
 ## Próximos pasos recomendados

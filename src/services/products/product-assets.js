@@ -1,4 +1,5 @@
 import { apiRequest } from '../api.client.js';
+import { DEMO_MODE } from '../../config/api.js';
 
 function validate(file, model) {
   if (!file || !file.size) throw new Error('Selecciona un archivo con contenido.');
@@ -8,7 +9,7 @@ function validate(file, model) {
   if (file.size > (model ? 100 : 10) * 1024 * 1024) throw new Error(model ? 'El modelo supera 100 MB.' : 'La imagen supera 10 MB.');
 }
 
-// Factoría local conservada para pruebas de frontend. No interviene en la instancia real.
+// Factoría local para pruebas y para el modo demostración explícito de Pages.
 export function createProductAssetService(urls = URL) {
   const owned = new Set();
   function select(file, model) {
@@ -43,4 +44,4 @@ export function createApiProductAssetService() {
   };
 }
 
-export const productAssets = typeof window !== 'undefined' ? createApiProductAssetService() : createProductAssetService();
+export const productAssets = typeof window === 'undefined' || DEMO_MODE ? createProductAssetService() : createApiProductAssetService();

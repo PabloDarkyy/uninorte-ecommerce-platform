@@ -4,6 +4,7 @@ export default {
   home: 'Home', catalog: 'Catalog', about: 'About us', contact: 'Contact', cart: 'Cart', profile: 'Profile', login: 'Sign in', register: 'Register', orders: 'Orders', admin: 'Administration',
   language: 'Language', currency: 'Currency', menu: 'Menu', search: 'Search products', all: 'All categories', filters: 'Filters', category: 'Category',
   themeDark: 'Dark mode', themeLight: 'Light mode',
+  demoMode: 'Demo mode', authNoticeDemo: 'Public demo: all data is fictional and stored only in this browser. There is no server, no real accounts, and no real payments.',
   phase: 'Delete this?', demo: 'Demo data and prices (TODO)',
   hero: 'E-commerce', heroText: 'Awesome text goes here (TODO)', featured: 'Featured products', categories: 'Introduction and categories', intro: '(TODO)', cta: 'Explore products',
   viewer: '3D PRODUCT VIEWER — (TODO)', image: 'Image pending', details: 'View product', pending: 'Content pending from the responsible student groups.', empty: 'No results.', notFound: 'Page not found', productNotFound: 'Product not found', error: 'Unable to load this view. Please try again.', loading: 'Loading…',

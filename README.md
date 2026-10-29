@@ -4,7 +4,7 @@ GlobalizaT es una plataforma académica de comercio electrónico para presentar 
 
 ## Demo pública
 
-La demo disponible en [GitHub Pages](https://pablodarkyy.github.io/uninorte-ecommerce-platform/) es una versión **congelada, solo frontend**, correspondiente al tag `stable-pages-pre-fullstack` (commit `db6e79c`). Usa datos simulados locales, no se conecta al backend ni a PostgreSQL y no representa el estado full-stack de esta rama.
+La demo disponible en [GitHub Pages](https://pablodarkyy.github.io/uninorte-ecommerce-platform/) publica el frontend actual, incluido el modo oscuro. Cuando no se configura un backend, el workflow activa explícitamente el **Modo demostración**: todos los datos son ficticios, se guardan únicamente en el navegador y no existen cuentas, conexiones ni pagos reales. La experiencia full-stack local conserva su comportamiento normal.
 
 ## Inicio rápido local
 
@@ -124,6 +124,7 @@ La pantalla de acceso también ofrece **Entrar con la cuenta de demostración** 
 | Raíz | `npm run start:backend` | Inicia únicamente el backend. |
 | Raíz | `npm test` | Ejecuta las pruebas unitarias/contractuales del frontend (`tests/*.test.js`). |
 | Raíz | `npm run test:backend` | Ejecuta las pruebas del backend; requiere `TEST_DATABASE_URL`. |
+| Raíz | `npm run test:e2e` | Prueba de humo en navegador (escritorio y móvil): navegación, catálogo y 3D, carrito y modo oscuro. Requiere Playwright y Microsoft Edge (o BROWSER_CHANNEL); base configurable con E2E_BASE_URL. |
 | `backend/` | `npm start` | Inicia la API. |
 | `backend/` | `npm run dev` | Inicia la API con `--watch`. |
 | `backend/` | `npm run db:check` | Comprueba conexión, tablas, conteos y claves foráneas. |
@@ -147,6 +148,30 @@ TEST_DATABASE_URL='postgresql://USUARIO:CONTRASENA@127.0.0.1:5432/globalizat_tes
 ```
 
 La protección se implementa en `backend/tests/support/database-guard.js`. Los archivos `tests/*.cjs` son pruebas de navegador opcionales y requieren Playwright/Edge; no forman parte de `npm test`.
+
+Instala Playwright sin descargar navegadores y ejecuta la prueba contra la aplicación local (por defecto, <http://127.0.0.1:4173/>):
+
+```powershell
+$env:PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
+npm install --no-save playwright
+npm run test:e2e
+```
+
+```sh
+PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install --no-save playwright
+npm run test:e2e
+```
+
+Para probar una URL de Pages, define `E2E_BASE_URL`:
+
+```powershell
+$env:E2E_BASE_URL = "https://usuario.github.io/repositorio/"
+npm run test:e2e
+```
+
+```sh
+E2E_BASE_URL='https://usuario.github.io/repositorio/' npm run test:e2e
+```
 
 ## Documentación
 

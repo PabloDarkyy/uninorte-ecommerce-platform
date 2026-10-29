@@ -27,20 +27,23 @@ jobs:
         uses: actions/checkout@v6
       - name: Verify contracts
         run: npm test
-      # The public Pages site is the frozen frontend-only demo (tag stable-pages-pre-fullstack, commit db6e79c); the full-stack app runs locally.
-      - name: Checkout frozen Pages demo
-        uses: actions/checkout@v6
-        with:
-          ref: stable-pages-pre-fullstack
-          path: pages-demo
+      # The tag stable-pages-pre-fullstack is the rollback point for the public demo.
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Prepare static frontend
+        env:
+          GLOBALIZAT_API_URL: ${{ vars.GLOBALIZAT_API_URL }}
         run: |
           mkdir -p dist
-          cp pages-demo/index.html dist/
-          cp -R pages-demo/src dist/src
+          cp index.html dist/
+          cp -R src dist/src
           touch dist/.nojekyll
+          if [ -n "$GLOBALIZAT_API_URL" ]; then
+            node -e 'const fs = require("node:fs"); fs.writeFileSync("dist/runtime-config.js", `window.__GLOBALIZAT_API_URL__ = ${JSON.stringify(process.env.GLOBALIZAT_API_URL)};\n`);'
+          else
+            node -e 'require("node:fs").writeFileSync("dist/runtime-config.js", "window.__GLOBALIZAT_DEMO__ = true;\n");'
+          fi
+          node -e 'const fs = require("node:fs"); const path = "dist/index.html"; const marker = "<script type=\"module\" src=\"./src/app.js\"></script>"; const html = fs.readFileSync(path, "utf8"); if (!html.includes(marker)) throw new Error("app.js script marker missing from dist/index.html"); fs.writeFileSync(path, html.replace(marker, `<script src="./runtime-config.js"></script>\n  ${marker}`));'
       - name: Upload frontend
         uses: actions/upload-pages-artifact@v4
         with:

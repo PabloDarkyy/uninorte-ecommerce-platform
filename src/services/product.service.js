@@ -1,6 +1,7 @@
 import { apiRequest } from './api.client.js';
 import { createMockProductRepository } from './products/mock-product-repository.js';
 import { displayText } from '../utils/product-display.js';
+import { DEMO_MODE } from '../config/api.js';
 
 function quantity(value) { const n = Number(value); if (!Number.isSafeInteger(n) || n < 0) throw new Error('El stock debe ser un entero mayor o igual a cero.'); return n; }
 function price(value) { const n = Number(value); if (!Number.isFinite(n) || n < 0 || n > 1e12) throw new Error('Introduce un precio válido mayor o igual a cero.'); return n; }
@@ -56,4 +57,6 @@ export function createApiProductService() {
   return service;
 }
 
-export const productService = typeof window !== 'undefined' ? createApiProductService() : createProductService(createMockProductRepository());
+export const productService = typeof window === 'undefined' || DEMO_MODE
+  ? createProductService(createMockProductRepository())
+  : createApiProductService();
