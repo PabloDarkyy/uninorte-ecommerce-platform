@@ -7,6 +7,7 @@ import { captureProduct, flyProduct } from '../../modules/product-entrance.js';
 import { openCart, rememberCartPreview } from '../../features/cart/cart-drawer.js';
 import { errorText } from '../../features/cart/presentation.js';
 import { motionOptions } from '../../modules/ui-motion.js';
+import { assetUrl } from '../../config/api.js';
 export function mountProductCommerce(dialog,product,viewer,onModelReady){
   const abort=new AbortController(),signal=abort.signal,mount=dialog.querySelector('[data-model-mount]');
   let variant=product.variants[0],busy=false,animation;
@@ -34,7 +35,7 @@ export function mountProductCommerce(dialog,product,viewer,onModelReady){
     try{
       animation=mount.animate([{opacity:1,transform:'scale(1)'},{opacity:0,transform:'scale(.98)'}],{...motionOptions('fast'),fill:'forwards'});await animation.finished;
       if(signal.aborted)return;
-      const media=productMedia(product,variant);let image=mount.querySelector('.stage-product-image');if(media.image){if(!image){image=document.createElement('img');image.className='stage-product-image';mount.prepend(image);}image.src=media.image;image.alt=displayText(product.name);}else image?.remove();
+      const media=productMedia(product,variant);let image=mount.querySelector('.stage-product-image');if(media.image){if(!image){image=document.createElement('img');image.className='stage-product-image';mount.prepend(image);}image.src=assetUrl(media.image);image.alt=displayText(product.name);}else image?.remove();
       const ready=await viewer.setModel(media.model);if(signal.aborted)return;
       const conceptual=mount.querySelector('.concept-product');if(conceptual)conceptual.hidden=Boolean(media.image);
       onModelReady(ready);animation.cancel();animation=mount.animate([{opacity:0,transform:'scale(.98)'},{opacity:1,transform:'scale(1)'}],motionOptions('fast'));await animation.finished;

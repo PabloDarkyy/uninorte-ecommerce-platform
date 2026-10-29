@@ -1,5 +1,6 @@
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { disposeObjects } from './three-utils.js';
+import { assetUrl } from '../../config/api.js';
 const entries = new Map();
 const limits = { idleEntries: 6, idleBytes: 32 * 1024 * 1024 };
 let loads = 0;
@@ -56,7 +57,7 @@ function instantiate(template) {
 }
 export async function acquireProductModel(modelUrl, { signal } = {}) {
   if (signal?.aborted) throw aborted();
-  const entry = getEntry(new URL(modelUrl, document.baseURI).href);
+  const entry = getEntry(new URL(assetUrl(modelUrl), document.baseURI).href);
   entry.waiters++;
   let onAbort;
   try {
