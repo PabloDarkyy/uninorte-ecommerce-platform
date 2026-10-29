@@ -8,6 +8,12 @@ Agregar o reemplazar un GLB desde Admin actualiza `model`. Al volver al catálog
 
 ## Presupuesto de renderizado
 
+En dispositivos con puntero táctil, `render-budget.js` limita el DPR a 1.5 y el buffer a dos millones de píxeles, incluyendo fullscreen y vuelos. La captura de transmisión usa media resolución; se conservan los GLB y materiales originales. Los límites de textura/renderbuffer del dispositivo también se respetan.
+
+La pérdida de contexto WebGL pausa el visor sin destruirlo. Al restaurarse, se regenera el entorno y se reutiliza el modelo; el catálogo puede reintentar previews fallidos. Sin preview disponible, la ficha se abre inmediatamente con su respaldo y carga el visor en segundo plano, sin bloquear información ni carrito. No se fuerza la recuperación si el sistema no vuelve a habilitar WebGL.
+
+`tests/mobile-3d.cjs` comprueba WebKit y Chromium con pantalla táctil/DPR 3, píxeles visibles, recuperación de contexto y Commerce. `tests/model-fallback.cjs` verifica la ficha y el carrito con WebGL desactivado y descargas GLB detenidas. WebKit de escritorio con emulación móvil no sustituye una prueba en un iPhone físico.
+
 `components/product-preview/product-preview.js` utiliza **un renderer WebGL para todo el catálogo**, con el entorno de estudio existente generado una sola vez. Lo comparte en exclusividad con el detalle seleccionado.
 
 Las tarjetas muestran **capturas renderizadas de sus GLB reales** en canvases 2D transparentes, con cámara fija y sin giro continuo. No son ilustraciones sustitutivas: se calculan usando el mismo visor, iluminación y materiales del detalle. Esta decisión evita un contexto WebGL, OrbitControls y un bucle de animación por tarjeta.

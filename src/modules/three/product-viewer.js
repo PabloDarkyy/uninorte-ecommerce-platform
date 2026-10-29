@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { acquireProductModel } from './product-model-cache.js';
 import { createStudioEnvironment, tuneStudioGlass } from './studio-environment.js';
 import { normalizeModel } from './three-utils.js';
+import { sizeProductRenderer } from './render-budget.js';
 
 export function createProductViewer({ container, modelUrl, label = 'Producto', autoRotate = true,
   interactive = true, initialRotation = {}, camera: cameraOptions = {}, lighting = {}, resources, staticPreview = false, startPaused = false }) {
@@ -15,7 +16,7 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
   let visible = true, interacting = false, lastInteraction = -Infinity, lastTime = 0;
   let speed = 0, scrollProgress = 0, settleFrames = 0, frameCount = 0, fittedDistance = 4, modelRadius = 1.18;
   let transitionLayout, transitionFrame;
-  let expanded = false, savedCamera, flight, held = startPaused;
+  let expanded = false, savedCamera, flight, held = startPaused, contextLost = false;
   const presentationCamera = new THREE.PerspectiveCamera();
   const direction = new THREE.Vector3();
   container.dataset.viewerState = 'loading';
@@ -51,7 +52,7 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
   }
 
   function canRender() {
-    return loaded && !disposed && (staticPreview || visible || flight) && !document.hidden &&
+    return loaded && !disposed && !contextLost && (staticPreview || visible || flight) && !document.hidden &&
       (!document.documentElement.classList.contains('modal-open') || Boolean(container.closest('dialog[open]')));
   }
 
@@ -119,8 +120,7 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
     camera.near = 0.01;
     camera.far = fittedDistance + 30;
     camera.updateProjectionMatrix();
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    if (!flight) renderer.setSize(transitionLayout?.width ?? width, transitionLayout?.height ?? height, false);
+    if (!flight && !contextLost) sizeProductRenderer(renderer, transitionLayout?.width ?? width, transitionLayout?.height ?? height);
     invalidate();
   }
 
@@ -162,7 +162,30 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
       controls.addEventListener('end', () => { interacting = false; lastInteraction = performance.now(); invalidate(); });
       controls.addEventListener('change', invalidate);
       canvas.addEventListener('keydown', () => { lastInteraction = performance.now(); invalidate(); }, { signal: abort.signal });
-      canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); fail(new Error('Contexto WebGL perdido.')); }, { signal: abort.signal });
+      canvas.addEventListener('webglcontextlost', event => {
+        event.preventDefault(); contextLost = true;
+        if (!resourceLease) environment?.dispose();
+        cancelAnimationFrame(frame); frame = 0;
+        container.dataset.viewerState = 'recovering';
+        container.dataset.rendering = 'false';
+        stage?.classList.remove('has-model'); canvas.classList.remove('is-ready');
+      }, { signal: abort.signal });
+      canvas.addEventListener('webglcontextrestored', () => {
+        if (disposed) return;
+        try {
+          contextLost = false;
+          if (!resourceLease) environment = createStudioEnvironment(renderer);
+          else environment = resourceLease.environment;
+          scene.environment = environment.texture;
+          resize();
+          if (loaded) {
+            render(performance.now());
+            if (disposed) return;
+            stage?.classList.add('has-model'); canvas.classList.add('is-ready');
+            container.dataset.viewerState = 'ready'; invalidate();
+          }
+        } catch (error) { fail(error); }
+      }, { signal: abort.signal });
       scene.add(new THREE.HemisphereLight(0xfff7e7, 0x788764, lighting.ambient ?? 1.5));
       [[0xfff4df, lighting.key ?? 3, [3, 5, 4]], [0xe7efdf, lighting.fill ?? 1.5, [-4, 2, 2]], [0xffffff, lighting.rim ?? 2, [2, 3, -4]]].forEach(([color, intensity, position]) => {
         const light = new THREE.DirectionalLight(color, intensity);
@@ -205,6 +228,8 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
       loaded = true;
       // Se retira visualmente el respaldo únicamente después del primer render exitoso.
       render(performance.now());
+      if (disposed) return false;
+      if (contextLost) { stage?.classList.remove('has-model'); return !staticPreview; }
       container.dataset.viewerState = 'ready';
       canvas.classList.add('is-ready');
       container.setAttribute('role', 'group');
@@ -229,11 +254,13 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
         if(disposed || (options.canCommit && !options.canCommit())){next.release();return false;}
         tuneStudioGlass(next.model);next.model.rotation.x=initialRotation.x ?? 0;next.model.rotation.y=initialRotation.y ?? 0;
         modelRadius=normalizeModel(next.model);spin.clear();modelLease?.release();modelLease=next;modelUrl=url;spin.add(next.model);loaded=true;
-        stage?.classList.add('has-model');resize();render(performance.now());container.dataset.viewerState='ready';invalidate();return true;
+        resize();render(performance.now());
+        if(disposed || contextLost)return false;
+        stage?.classList.add('has-model');container.dataset.viewerState='ready';invalidate();return true;
       } catch { next?.release();if(!disposed && !options.retainOnError){loaded=false;spin.clear();modelLease?.release();modelLease=null;stage?.classList.remove('has-model');container.dataset.viewerState='fallback';}return false; }
     },
     snapshot(target) {
-      if (!loaded || disposed) return null;
+      if (!loaded || disposed || contextLost) return null;
       // A scrolled detail can be outside the viewport when its Buy button is clicked.
       const previousVisible=visible,previousHeld=held;
       visible=true;held=true;
@@ -244,12 +271,12 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
       return { distance: camera.position.length(), height: container.getBoundingClientRect().height };
     },
     setFlightFrame(state) {
-      if (!loaded || disposed) return;
+      if (!loaded || disposed || contextLost) return;
       cancelAnimationFrame(frame); frame = 0; held = true; flight = state; controls.enabled = false;
       const canvas = renderer.domElement;
       if (canvas.parentElement !== state.layer) {
         state.layer.append(canvas); canvas.tabIndex = -1;
-        renderer.setSize(state.width, state.height, false);
+        sizeProductRenderer(renderer, state.width, state.height);
       }
       render(performance.now());
     },

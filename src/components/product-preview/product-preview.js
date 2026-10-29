@@ -28,7 +28,7 @@ export function mountCatalogPreviews(root, products) {
       if(!await viewer.ready || disposed) { if(!disposed && activeViewer===viewer)record.failed=true;return; }
       if(document.hidden)return;
       const canvas=record.canvas || document.createElement('canvas');canvas.className='catalog-model-preview';canvas.setAttribute('aria-hidden','true');
-      const pose=viewer.snapshot(canvas);if(!pose)return;
+      const pose=viewer.snapshot(canvas);if(!pose){record.failed=true;return;}
       if(!record.canvas)record.mount.append(canvas);
       record.canvas=canvas;record.pose=pose;record.dirty=false;record.used=performance.now();record.width=rect.width;record.height=rect.height;
       record.mount.closest('.product-stage').classList.add('has-model');record.mount.dataset.previewState='ready';record.mount.setAttribute('aria-label',`Vista 3D de ${displayText(record.product.name)}`);
@@ -48,15 +48,17 @@ export function mountCatalogPreviews(root, products) {
   });
   records.forEach(r=>{visibility.observe(r.mount);resize.observe(r.mount);});
   document.addEventListener('visibilitychange',pump,{signal:abort.signal});
+  document.addEventListener('product3drestore',()=>{records.forEach(r=>{r.failed=false;r.dirty=true;});pump();},{signal:abort.signal});
   return {
     async select(product) {
       paused=true; const current=activeViewer;activeViewer=null;current?.dispose();await running;
       if(disposed)return null;
       const record=[...records.values()].find(r=>r.product.id===product.id);
-      if(record && (!record.pose || record.dirty) && !record.failed) { try { await capture(record); } catch { record.failed=true; } }
+      // Product information must never wait for an uncached/failed GPU preview.
       if(disposed)return null;
       let released=false;
       return { resources, pose:record?.pose, source:record?.canvas, failed:record?.failed,
+        instant:Boolean(record && (!record.pose || record.dirty || record.failed)),
         release(){if(released)return;released=true;paused=false;pump();} };
     },
     dispose(){disposed=true;abort.abort();visibility.disconnect();resize.disconnect();activeViewer?.dispose();host.remove();resources.dispose();records.forEach(r=>{r.canvas?.remove();if(r.canvas)r.canvas.width=r.canvas.height=1;});},

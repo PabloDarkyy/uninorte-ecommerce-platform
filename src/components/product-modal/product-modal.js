@@ -17,6 +17,7 @@ export function closeProductModal() {
 export function openProductModal(product, trigger, selection) {
   if (!product || activeDialog) { selection?.release?.(); return; }
   const dialog = document.createElement('dialog');
+  const sharedTransition = selection && !selection.instant;
   let viewer, disposeExpanded, surfaceAnimation, entrance, disposeCommerce, closing = false;
   function requestClose() {
     if (closing) return; closing = true; entrance?.finish(); surfaceAnimation?.cancel(); dialog.classList.add('is-closing');
@@ -24,7 +25,8 @@ export function openProductModal(product, trigger, selection) {
     surfaceAnimation.finished.then(() => dialog.close()).catch(() => {});
   }
   dialog.className = 'product-modal';
-  if (selection) { dialog.classList.add('is-product-entering'); dialog.dataset.productTransition='preparing'; dialog.tabIndex=-1; }
+  if (sharedTransition) { dialog.classList.add('is-product-entering'); dialog.dataset.productTransition='preparing'; dialog.tabIndex=-1; }
+  else dialog.dataset.productTransition='ready';
   dialog.setAttribute('aria-labelledby', 'preview-title');
   dialog.setAttribute('aria-describedby', 'preview-description');
   dialog.style.setProperty('--product-accent', productAccent(product));
@@ -71,13 +73,13 @@ export function openProductModal(product, trigger, selection) {
   activeDialog = dialog;
   document.documentElement.classList.add('modal-open');
   document.dispatchEvent(new Event('productmodalchange'));
-  if(selection)dialog.querySelector('.modal-card').inert=true;
+  if(sharedTransition)dialog.querySelector('.modal-card').inert=true;
   dialog.showModal(); // Dialog nativo: Escape, foco contenido y fondo inerte.
-  if(!selection)surfaceAnimation = animateSurface(dialog.querySelector('.modal-card'));
-  viewer = mountProductStage(dialog, product, { resources:selection?.resources, startPaused:Boolean(selection), disableModel:Boolean(selection?.failed) });
+  if(!sharedTransition)surfaceAnimation = animateSurface(dialog.querySelector('.modal-card'));
+  viewer = mountProductStage(dialog, product, { resources:selection?.resources, startPaused:Boolean(sharedTransition), disableModel:Boolean(selection?.failed) });
   const expanded = value => { disposeExpanded?.();disposeExpanded=undefined;if(value)disposeExpanded=mountExpandedViewer(dialog,viewer,displayText(product.name)); };
   disposeCommerce=mountProductCommerce(dialog,product,viewer,expanded);
-  if(selection)entrance=createProductEntrance(dialog,viewer,selection);
+  if(sharedTransition)entrance=createProductEntrance(dialog,viewer,selection);
   (async()=>{
     const ready=await viewer.ready;
     if(entrance)await entrance.finished;
