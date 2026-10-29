@@ -191,10 +191,41 @@ E2E_BASE_URL='https://usuario.github.io/repositorio/' npm run test:e2e
 
 Proyecto académico - UniNorte.
 
-- Grupo 1 - _pendiente: integrantes_
-- Grupo 2 - _pendiente: integrantes_
-- Grupo 3 - _pendiente: integrantes_
-- Grupo 4 - _pendiente: integrantes_
-- Grupo 5 - _pendiente: integrantes_
+### Grupo 1 — Análisis y Gestión del Proyecto
 
-No se encontró un archivo `LICENSE` para el proyecto, por lo que no hay una licencia general definida. La copia vendorizada de Three.js conserva su propia licencia MIT en [`src/vendor/three/LICENSE`](src/vendor/three/LICENSE).
+- Diana Fernandez
+- Dilarin Delgado
+- Pablo Benitez
+- Jose Gonzalez
+- Gabriela Cañiza
+
+### Grupo 2 — Diseño UI/UX y Frontend
+
+- Pablo Bernal
+- Daniel Torales
+- Diego Haas
+- Sigrid Troxler
+- Gonzalo Caceres
+
+### Grupo 3 — Backend
+
+- Isaias Samaniego
+- Sebastian Da Silva
+- Santiago García
+- Micaela Martinez
+- Abel Becker
+
+### Grupo 4 — Base de Datos
+
+- Pablo Britez
+- Dahiana Cardozo
+- Lucas Baez
+- Veronica Jasinski
+
+### Grupo 5 — QA, Testing, Integración y Seguridad
+
+- Alejandro Baez
+- Blas Acosta
+- Pamela Espinola
+- Paloma Miranda
+- Miguel Benitez
