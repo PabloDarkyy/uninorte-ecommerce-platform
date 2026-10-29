@@ -3,6 +3,7 @@ import { es as commerce } from './commerce.js';
 export default {
   home: 'Inicio', catalog: 'Catálogo', about: 'Nosotros', contact: 'Contacto', cart: 'Carrito', profile: 'Perfil', login: 'Ingresar', register: 'Registro', orders: 'Pedidos', admin: 'Administración',
   language: 'Idioma', currency: 'Moneda', menu: 'Menú', search: 'Buscar productos', all: 'Todas las categorías', filters: 'Filtros', category: 'Categoría',
+  themeDark: 'Modo oscuro', themeLight: 'Modo claro',
   phase: 'Prototipo', demo: 'Datos y precios no reales (TODO)',
   hero: 'E-commerce', heroText: 'Poner algo interesante aqui', featured: 'Productos destacados', categories: 'Introducción y categorías', intro: '(TODO)', cta: 'Explorar los productos',
   viewer: '3D PRODUCT VIEWER — Pendiente', image: 'Imagen pendiente', details: 'Ver producto', pending: 'Contenido pendiente de los grupos responsables.', empty: 'No hay resultados.', notFound: 'Página no encontrada', productNotFound: 'Producto no encontrado', error: 'No se pudo cargar esta vista. Intenta nuevamente.', loading: 'Cargando…',

@@ -1,8 +1,8 @@
-.product-modal { border: 0; padding: 55px 8px 12px; width: min(640px, calc(100% - 28px)); max-width: none; max-height: calc(100dvh - 32px); background: transparent; color: var(--text); overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-.product-modal::backdrop { background: rgb(26 43 32 / 16%); backdrop-filter: blur(7px) saturate(85%); }
-.modal-card { position: relative; border: 1px solid var(--glass-border); border-radius: var(--radius-lg); background: linear-gradient(145deg, var(--glass-highlight), transparent 42%), var(--glass-bg-strong); backdrop-filter: blur(var(--glass-blur)) saturate(120%); box-shadow: 0 3px 8px rgb(22 39 27 / 8%), inset 0 1px 0 var(--glass-highlight); }
+.product-modal { border: 0; padding: 55px 8px 12px; width: min(640px, calc(100% - 28px)); max-width: none; max-height: calc(100dvh - 32px); background: var(--transparent, transparent); color: var(--text); overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.product-modal::backdrop { background: var(--scrim, rgb(26 43 32 / 16%)); backdrop-filter: blur(7px) saturate(85%); }
+.modal-card { position: relative; border: 1px solid var(--glass-border); border-radius: var(--radius-lg); background: linear-gradient(145deg, var(--glass-highlight), var(--transparent, transparent) 42%), var(--glass-bg-strong); backdrop-filter: blur(var(--glass-blur)) saturate(120%); box-shadow: 0 3px 8px var(--shadow-color, rgb(22 39 27 / 8%)), inset 0 1px 0 var(--glass-highlight); }
 .modal-x { position: absolute; top: 17px; right: 18px; z-index: 3; background: var(--glass-bg); border: 1px solid var(--glass-border); }
-.modal-visual { position: relative; height: 185px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: linear-gradient(150deg, color-mix(in srgb, var(--product-accent) 14%, transparent), transparent); border-bottom: 1px solid var(--glass-border); }
+.modal-visual { position: relative; height: 185px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: linear-gradient(150deg, color-mix(in srgb, var(--product-accent) 14%, var(--transparent, transparent)), var(--transparent, transparent)); border-bottom: 1px solid var(--glass-border); }
 .modal-visual:has(.has-model) { height: 240px; }
 .modal-visual .product-stage--modal.has-model { height: 288px; top: -48px; }
 .modal-eyebrow { position: absolute; left: 25px; top: 25px; color: var(--text-muted); font-size: 9px; letter-spacing: 1.4px; }
@@ -34,8 +34,8 @@
 .preview-details dd { margin: 0; }
 .preview-details p { color: var(--text-muted); }
 .viewer-expand { position: absolute; right: 18px; bottom: 14px; z-index: 4; background: var(--glass-bg-strong); border: 1px solid var(--glass-border); box-shadow: var(--shadow); }
-.expanded-viewer { position: fixed; inset: 0; width: min(1100px, calc(100% - 32px)); height: min(820px, calc(100dvh - 40px)); max-width: none; max-height: none; padding: 0; overflow: hidden; border: 1px solid var(--glass-border); border-radius: 30px; background: linear-gradient(145deg, var(--surface), var(--nature-bg)); color: var(--text); box-shadow: 0 24px 90px rgb(20 35 25 / 25%); }
-.expanded-viewer::backdrop { background: rgb(22 36 26 / 38%); backdrop-filter: blur(12px) saturate(85%); }
+.expanded-viewer { position: fixed; inset: 0; width: min(1100px, calc(100% - 32px)); height: min(820px, calc(100dvh - 40px)); max-width: none; max-height: none; padding: 0; overflow: hidden; border: 1px solid var(--glass-border); border-radius: 30px; background: linear-gradient(145deg, var(--surface), var(--nature-bg)); color: var(--text); box-shadow: 0 24px 90px var(--shadow-color, rgb(20 35 25 / 25%)); }
+.expanded-viewer::backdrop { background: var(--scrim, rgb(22 36 26 / 38%)); backdrop-filter: blur(12px) saturate(85%); }
 .expanded-close { position: absolute; z-index: 2; right: 16px; top: 16px; background: var(--glass-bg-strong); border: 1px solid var(--glass-border); }
 .expanded-stage { position: absolute; inset: 50px 12px 56px; }
 .expanded-stage .product-canvas { opacity: 1; cursor: grab; }

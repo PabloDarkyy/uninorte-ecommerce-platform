@@ -6,6 +6,12 @@
   <meta name="description" content="GlobalizaT: Tecnología y Comercio para Conectar con el Mundo. Productos paraguayos, raíces locales y nuevos horizontes.">
   <title>GT · GlobalizaT</title>
   <link rel="icon" href="./src/assets/icons/favicon.svg" type="image/svg+xml">
+  <script>
+    try {
+      const theme = localStorage.getItem('uninorte.theme');
+      if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+    } catch { /* The operating-system preference remains available when storage is blocked. */ }
+  </script>
   <link rel="stylesheet" href="./src/styles/main.css">
   <script type="importmap">
     { "imports": { "three": "./src/vendor/three/build/three.module.min.js", "three/addons/": "./src/vendor/three/examples/jsm/" } }

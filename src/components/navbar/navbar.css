@@ -11,8 +11,11 @@
 .nav-content nav a:hover::after,.nav-content nav a[aria-current]::after { transform: scaleX(1); }
 .nav-tools { display: flex; align-items: center; gap: 8px; }
 .nav-tools > .icon { width: 17px; height: 17px; }
-.visual-selector select { border: 0; padding: 8px 2px; background: transparent; font-size: 12px; font-weight: 600; color: var(--green-dark); -webkit-text-fill-color: var(--green-dark); }
+.visual-selector select { border: 0; padding: 8px 2px; background: var(--transparent, transparent); font-size: 12px; font-weight: 600; color: var(--green-dark); -webkit-text-fill-color: var(--green-dark); }
 .nav-divider { width: 1px; height: 18px; margin-inline: 7px; background: var(--border); }
+.theme-toggle { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 100px; background: var(--surface-raised, var(--surface)); color: var(--green-dark); font-size: 11px; font-weight: 600; white-space: nowrap; }
+.theme-toggle:hover { border-color: var(--green-dark); }
+.theme-toggle > span[aria-hidden] { font-size: 16px; line-height: 1; }
 .cart-preview { margin-left: 10px; border: 1px solid var(--border); }
 .menu-toggle { display: none; }
 @media (max-width: 1050px) { .nav-content { gap: 22px; } .nav-content nav { gap: 17px; } .navbar { gap: 15px; padding-inline: 20px; } .brand { font-size: 21px; } }

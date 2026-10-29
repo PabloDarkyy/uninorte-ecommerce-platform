@@ -1,11 +1,14 @@
 import { WebGLRenderer, SRGBColorSpace, ACESFilmicToneMapping } from 'three';
 import { createStudioEnvironment } from './studio-environment.js';
+import { getTheme } from '../../features/theme/theme.js';
 // Un recurso por catálogo, compartido con su detalle. Las tarjetas nunca lo poseen.
 export function createCatalogRenderer() {
   let renderer, environment, broken = false, disposed = false, users = 0, disposeRequested = false;
+  const updateThemeExposure = () => { if (renderer) renderer.toneMappingExposure = 1.15 * (getTheme() === 'dark' ? 0.9 : 1); };
+  window.addEventListener('themechange', updateThemeExposure);
   function destroy() {
     if (disposed || users) return;
-    disposed = true; environment?.dispose(); renderer?.domElement.remove(); renderer?.dispose(); renderer?.forceContextLoss();
+    disposed = true; window.removeEventListener('themechange', updateThemeExposure); environment?.dispose(); renderer?.domElement.remove(); renderer?.dispose(); renderer?.forceContextLoss();
   }
   return {
     acquire() {
@@ -19,7 +22,7 @@ export function createCatalogRenderer() {
           document.dispatchEvent(new Event('product3drestore'));
         });
         renderer.setClearColor(0x000000,0); renderer.outputColorSpace=SRGBColorSpace;
-        renderer.toneMapping=ACESFilmicToneMapping; renderer.toneMappingExposure=1.15;
+        renderer.toneMapping=ACESFilmicToneMapping; updateThemeExposure();
         environment=createStudioEnvironment(renderer);
       }
       users++; let released=false;

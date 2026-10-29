@@ -3,7 +3,7 @@
 @keyframes bar-arrive { from { transform:scaleX(0); } to { transform:scaleX(var(--bar-size)); } }
 @keyframes overlay-arrive { from { opacity:0; backdrop-filter:blur(0); } to { opacity:1; backdrop-filter:blur(9px); } }
 @keyframes overlay-leave { from { opacity:1; backdrop-filter:blur(9px); } to { opacity:0; backdrop-filter:blur(0); } }
-.product-modal::backdrop,.admin-dialog::backdrop,.expanded-viewer::backdrop { background:rgb(26 43 32 / 28%); backdrop-filter:blur(9px); animation:overlay-arrive var(--duration-normal) var(--ease-premium) both; }
+.product-modal::backdrop,.admin-dialog::backdrop,.expanded-viewer::backdrop { background:var(--scrim, rgb(26 43 32 / 28%)); backdrop-filter:blur(9px); animation:overlay-arrive var(--duration-normal) var(--ease-premium) both; }
 .is-closing::backdrop { animation:overlay-leave var(--duration-fast) var(--ease-premium) both; }
 .product-modal[open] .modal-content,.product-modal[open] .modal-visual { animation:content-arrive var(--duration-normal) var(--ease-premium) both; }
 .product-modal[open] .modal-content { animation-delay:60ms; }

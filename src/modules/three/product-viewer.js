@@ -4,6 +4,7 @@ import { acquireProductModel } from './product-model-cache.js';
 import { createStudioEnvironment, tuneStudioGlass } from './studio-environment.js';
 import { normalizeModel } from './three-utils.js';
 import { sizeProductRenderer } from './render-budget.js';
+import { getTheme } from '../../features/theme/theme.js';
 
 export function createProductViewer({ container, modelUrl, label = 'Producto', autoRotate = true,
   interactive = true, initialRotation = {}, camera: cameraOptions = {}, lighting = {}, resources, staticPreview = false, startPaused = false }) {
@@ -17,9 +18,15 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
   let speed = 0, scrollProgress = 0, settleFrames = 0, frameCount = 0, fittedDistance = 4, modelRadius = 1.18;
   let transitionLayout, transitionFrame;
   let expanded = false, savedCamera, flight, held = startPaused, contextLost = false;
+  const baseExposure = lighting.exposure ?? 1.15;
   const presentationCamera = new THREE.PerspectiveCamera();
   const direction = new THREE.Vector3();
   container.dataset.viewerState = 'loading';
+
+  function updateThemeExposure() {
+    if (renderer) renderer.toneMappingExposure = baseExposure * (getTheme() === 'dark' ? 0.9 : 1);
+  }
+  window.addEventListener('themechange', updateThemeExposure, { signal: abort.signal });
 
   function dispose() {
     if (disposed) return;
@@ -131,7 +138,7 @@ export function createProductViewer({ container, modelUrl, label = 'Producto', a
       renderer.setClearColor(0x000000, 0);
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = lighting.exposure ?? 1.15;
+      updateThemeExposure();
       const canvas = renderer.domElement;
       canvas.className = 'product-canvas';
       canvas.style.cssText = '';

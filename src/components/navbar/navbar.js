@@ -7,6 +7,17 @@ let disposeNavbar;
 import { languageSelector } from '../language-selector/language-selector.js';
 import { currencySelector } from '../currency-selector/currency-selector.js';
 import { icon } from '../../utils/icons.js';
+import { getTheme, toggleTheme } from '../../features/theme/theme.js';
+
+function syncThemeButton(root) {
+  const button = root.querySelector('[data-theme-toggle]');
+  if (!button) return;
+  const isDark = getTheme() === 'dark';
+  const label = t(isDark ? 'themeLight' : 'themeDark');
+  button.setAttribute('aria-pressed', String(isDark));
+  button.setAttribute('aria-label', label);
+  button.innerHTML = `<span aria-hidden="true">${isDark ? '☀' : '☾'}</span><span>${label}</span>`;
+}
 
 export function renderNavbar(root) {
   disposeNavbar?.();const abort=new AbortController();
@@ -14,12 +25,15 @@ export function renderNavbar(root) {
     <a class="brand" href="#/home" aria-label="GlobalizaT, inicio"><span class="brand-mark">GT<span>·</span></span><span>GlobalizaT<small>TIERRA & ORIGEN</small></span></a>
     <button id="menu-toggle" class="icon-button menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="global-nav">${icon('menu')}</button>
     <div id="global-nav" class="nav-content"><nav aria-label="Navegación principal"><a href="#/home">${t('home')}</a><a href="#/catalog">${t('catalog')}</a><a href="#/about">${t('about')}</a><a href="#/contact">${t('contact')}</a><a href="#/account">${t('profile')}</a></nav>
-      <div class="nav-tools">${icon('globe')}${languageSelector({disabled:false,value:getLanguage()})}<span class="nav-divider" aria-hidden="true"></span>${currencySelector({disabled:false,value:getCurrency()})}<button class="signout-button" data-signout>${t('logout')}</button></div>
+      <div class="nav-tools">${icon('globe')}${languageSelector({disabled:false,value:getLanguage()})}<span class="nav-divider" aria-hidden="true"></span>${currencySelector({disabled:false,value:getCurrency()})}<button class="signout-button" data-signout>${t('logout')}</button><button class="theme-toggle" type="button" data-theme-toggle></button></div>
     </div><button class="icon-button cart-preview" data-cart-open aria-label="${t('cart')}" aria-haspopup="dialog">${icon('bag')}<span data-cart-count aria-live="polite">0</span></button></div>`;
   root.querySelector('#language').addEventListener('change',event=>setLanguage(event.target.value));
   root.querySelector('#currency').addEventListener('change',event=>setCurrency(event.target.value));
   root.querySelector('[data-cart-open]').addEventListener('click',()=>openCart());
   root.querySelector('[data-signout]').addEventListener('click',async()=>{await authService.logout();await cartService.clearCart();location.reload();});
+  root.querySelector('[data-theme-toggle]').addEventListener('click',()=>toggleTheme());
+  window.addEventListener('themechange',()=>syncThemeButton(root),{signal:abort.signal});
+  syncThemeButton(root);
   const count=async()=>{const value=await cartService.getItemCount();if(!abort.signal.aborted)root.querySelector('[data-cart-count]').textContent=value;};
   const unsubscribe=cartService.subscribe(count);count();disposeNavbar=()=>{abort.abort();unsubscribe();};
   const toggle = root.querySelector('#menu-toggle');
