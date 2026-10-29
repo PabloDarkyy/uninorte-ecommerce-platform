@@ -24,4 +24,12 @@ Desktop.ini
 
 # src/vendor/three/build/ es una dependencia de ejecución y DEBE versionarse.
 
-# Base de datos local del Backend
+# Datos y cargas locales del Backend
+backend/data/store.json
+backend/data/store.json.tmp
+backend/uploads/**
+!backend/uploads/.gitkeep
+
+# Respaldos locales y repositorios anidados
+*.zip
+ECOMMERCE/
