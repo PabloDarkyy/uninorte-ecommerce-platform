@@ -3,6 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "scripts": { "start": "node scripts/serve.js", "test": "node --test tests/*.test.js" },
-  "engines": { "node": ">=20" }
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "test": "node --test tests/*.test.js",
+    "start:frontend": "node scripts/serve.js",
+    "start:backend": "node backend/src/server.js",
+    "start:all": "node scripts/start-all.js"
+  },
+  "engines": {
+    "node": ">=22.5"
+  }
 }

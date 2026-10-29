@@ -23,3 +23,5 @@ Thumbs.db
 Desktop.ini
 
 # src/vendor/three/build/ es una dependencia de ejecución y DEBE versionarse.
+
+# Base de datos local del Backend

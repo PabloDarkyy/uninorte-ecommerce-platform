@@ -5,7 +5,7 @@ import { openProductForm } from './components/product-form.js';
 import { openProductModal } from '../../components/product-modal/product-modal.js';
 import { createDialog } from '../../modules/ui-motion.js';
 const sections = [['dashboard','Dashboard','◈'],['products','Productos',icon('leaf')],['sales','Ventas','↗'],['orders','Pedidos','▤'],['inventory','Inventario','▦']];
-const introductions = { dashboard: ['Cada origen, una oportunidad.','Una mirada a tu colección y al movimiento de la tienda.'], products: ['Tu colección','Cuida los detalles de cada producto, desde su origen hasta su presentación.'], sales: ['El pulso de la tienda','Explora un reporte ficticio, creado para esta demostración.'], orders: ['Pedidos de la tienda','Toda la información de compra, reunida en un lugar.'], inventory: ['Cada unidad cuenta','Consulta y actualiza las existencias de tu colección.'] };
+const introductions = { dashboard: ['Cada origen, una oportunidad.','Una mirada a tu colección y al movimiento de la tienda.'], products: ['Tu colección','Cuida los detalles de cada producto, desde su origen hasta su presentación.'], sales: ['El pulso de la tienda','Consulta ventas e inventario calculados desde la información del servidor.'], orders: ['Pedidos de la tienda','Toda la información de compra, reunida en un lugar.'], inventory: ['Cada unidad cuenta','Consulta y actualiza las existencias de tu colección.'] };
 export async function adminPage(path, services = adminServices) {
   const [, , part, orderId] = path.split('/');
   const current = sections.some(([key]) => key === part) ? part : 'dashboard';

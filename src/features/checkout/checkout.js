@@ -28,7 +28,13 @@ export async function openCheckout(){
     if(step===3)content=`${rows(review.rows,review.currency)}<div class="checkout-address"><h3>${t('address')}</h3><p>${e(personal.firstName)} ${e(personal.lastName)}<br>${e(shipping.addressLine)}, ${e(shipping.city)}<br>${e(shipping.country)} ${e(shipping.postalCode||'')}<br>${e(shipping.phone)}</p></div><div class="commerce-total"><span>${t('total')} · ${e(review.currency)}</span><strong>${e(money(review.total,review.currency))}</strong></div><p class="commerce-notice">${t('simulated')}</p>`;
     if(step===4)content=`<div class="checkout-success"><span aria-hidden="true">✓</span><h3>${t('confirmed')}</h3><p>${t('confirmedText')}</p><strong>#${e(order.id)}</strong></div>${rows(order.items,order.currency)}<div class="commerce-total"><span>${t('total')}</span><strong>${e(money(order.total,order.currency))}</strong></div><p>${e(order.shippingAddress.recipientName)}<br>${e(order.shippingAddress.addressLine)}, ${e(order.shippingAddress.city)}, ${e(order.shippingAddress.country)}</p><p>${t('status')}: ${t('preparing')}<br>${t('eta')}: ${e(order.estimatedDelivery)}</p><div class="checkout-actions"><a class="button" href="#/account/tracking/${e(order.id)}" data-finish>${t('viewTracking')}</a><a class="button button-secondary" href="#/catalog" data-finish>${t('backCatalog')}</a></div>`;
     dialog.innerHTML=`<section class="checkout-panel"><header><div><p class="eyebrow">GLOBALIZAT · DEMO</p><h2 id="checkout-title">${t('checkoutTitle')}</h2></div><button class="icon-button" data-close aria-label="${t('close')}">×</button></header><ol class="checkout-steps">${steps.map((key,i)=>`<li ${i===step?'aria-current="step"':''} class="${i<=step?'is-complete':''}"><span>${i+1}</span><small>${t(key)}</small></li>`).join('')}</ol><form autocomplete="off">${content}<p role="alert" class="commerce-error"></p>${step<4?`<div class="checkout-actions">${step?`<button type="button" class="button button-secondary" data-back>${t('back')}</button>`:''}<button class="button" type="submit">${t(step===3?'confirmPurchase':'next')} →</button></div>`:''}</form></section>`;
-    dialog.dataset.checkoutStep=String(step);dialog.querySelector('input, [type=submit], [data-finish]')?.focus({preventScroll:true});
+    dialog.dataset.checkoutStep=String(step);
+    // Bind the submit handler directly to the freshly-rendered form.
+    // This avoids relying on bubbling from <form> through <dialog> in older
+    // browser/event implementations and guarantees that the confirmation
+    // button is handled without causing a native page navigation.
+    dialog.querySelector('form')?.addEventListener('submit', handleSubmit);
+    dialog.querySelector('input, [type=submit], [data-finish]')?.focus({preventScroll:true});
   }
   try{
     [user,addresses,review]=await Promise.all([accountServices.userService.getCurrentUser(),accountServices.addressService.list(),cartService.getSummary()]);
@@ -40,17 +46,44 @@ export async function openCheckout(){
   dialog.addEventListener('cancel',event=>{event.preventDefault();close();},{signal:abort.signal});
   dialog.addEventListener('click',event=>{if(event.target===dialog||event.target.closest('[data-close],[data-finish]'))close();else if(event.target.closest('[data-back]')&&!busy){readDetails();dialog.querySelector('form')?.reset();step--;render();}},{signal:abort.signal});
   dialog.addEventListener('change',event=>{if(event.target.matches('[data-address]')){readDetails();const chosen=addresses.find(a=>a.id===event.target.value);if(chosen)Object.assign(shipping,chosen,{savedId:chosen.id});else{Object.keys(shipping).forEach(k=>delete shipping[k]);shipping.phone=personal.phone;}render();}},{signal:abort.signal});
-  dialog.addEventListener('submit',async event=>{
-    event.preventDefault();if(busy)return;
-    const form=event.target;if(!form.reportValidity())return;readDetails();
-    if(step===2){const number=form.elements.cardNumber.value.replace(/\s/g,'');if(!/^\d{12,19}$/.test(number)){form.querySelector('[role=alert]').textContent=t('paymentError');return;}form.reset();}
+  async function handleSubmit(event){
+    event.preventDefault();
+    event.stopPropagation();
+    if(busy)return;
+    const form=event.currentTarget;
+    if(!form?.reportValidity())return;
+    readDetails();
+    if(step===2){
+      const number=form.elements.cardNumber.value.replace(/\s/g,'');
+      if(!/^\d{12,19}$/.test(number)){form.querySelector('[role=alert]').textContent=t('paymentError');return;}
+      form.reset();
+    }
     busy=true;form.querySelectorAll('button').forEach(b=>b.disabled=true);
     try{
-      if(step===3){const feedback=createPaymentFeedback(dialog);try{[order]=await Promise.all([checkoutService.confirm({review,shippingAddress:{...shipping,recipientName:`${personal.firstName} ${personal.lastName}`},userId:user.id,requestId}),feedback.ready]);await feedback.success();step=4;}finally{feedback.dispose();}}
-      else{if(step===2){review=await cartService.getSummary();if(!review.rows.length)throw new Error('EMPTY_CART');}step++;}
+      if(step===3){
+        const feedback=createPaymentFeedback(dialog);
+        try{
+          [order]=await Promise.all([
+            checkoutService.confirm({review,shippingAddress:{...shipping,recipientName:`${personal.firstName} ${personal.lastName}`},userId:user.id,requestId}),
+            feedback.ready,
+          ]);
+          await feedback.success();
+          step=4;
+        }finally{feedback.dispose();}
+      }else{
+        if(step===2){review=await cartService.getSummary();if(!review.rows.length)throw new Error('EMPTY_CART');}
+        step++;
+      }
       render();
-    }catch(error){if(step===3){try{review=await cartService.getSummary();render();}catch{step=1;render();}}dialog.querySelector('[role=alert]').textContent=t(error.message==='CART_CHANGED'?'cartChanged':'checkoutError');}
-    finally{busy=false;if(pendingClose)close();dialog.querySelectorAll('button').forEach(b=>b.disabled=false);}
-  },{signal:abort.signal});
+    }catch(error){
+      if(step===3){try{review=await cartService.getSummary();render();}catch{step=1;render();}}
+      const alert=dialog.querySelector('[role=alert]');
+      if(alert) alert.textContent=t((error.code || error.message)==='CART_CHANGED'?'cartChanged':'checkoutError');
+    }finally{
+      busy=false;
+      if(pendingClose)close();
+      dialog.querySelectorAll('button').forEach(b=>b.disabled=false);
+    }
+  }
   window.addEventListener('preferenceschange',async()=>{if(busy)return;readDetails();if(step===3){try{review=await cartService.getSummary();}catch{step=1;}}render();},{signal:abort.signal});
 }

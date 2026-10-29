@@ -26,6 +26,11 @@ test('invalid writes are atomic and repository failures are surfaced',async()=>{
  await assert.rejects(products.updateStock('mani','missing',1));await assert.rejects(products.updateStock('mani',null,-1));assert.deepEqual(await products.getById('mani'),old);
  const repo=createMockProductRepository();const broken=createProductService({read:repo.read,async write(){throw new Error('Sin conexión');}});await assert.rejects(broken.updateProduct('mani',{stock:4}),/Sin conexión/);assert.equal((await broken.getById('mani')).stock,10);
 });
+test('general stock updates every variant and matches product commerce availability',async()=>{
+ const {products}=setup();await products.updateStock('harina',null,7);
+ const saved=await products.getById('harina');assert.equal(saved.stock,7);assert.ok(saved.variants.length>1);
+ for(const variant of saved.variants){assert.equal(variant.stock,7);assert.equal(Math.min(saved.stock,variant.stock),7);}
+});
 test('each analytics snapshot is coherent, isolated and separates currencies',async()=>{
  const {products,accounts}=setup();await products.updateProduct('miel',{baseCurrency:'USD',basePrice:3.25});
  let random=0; const service=createMockAnalyticsService(products,accounts.orderService,()=>{random=(random+.17)%1;return random;},()=>new Date('2026-09-13T12:00:00Z'));
