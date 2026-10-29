@@ -36,7 +36,7 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO products (id, slug, base_price, base_currency, stock, image_url, model_url, model_name, accent_color, hero_featured, featured, active, availability, created_at, updated_at) VALUES
   ('mani', 'mani', 10000, 'PYG', 10, NULL, './src/assets/models/mani.glb', NULL, '#A36B43', FALSE, TRUE, TRUE, 'available', '2026-09-25T17:00:00-03:00', '2026-09-25T17:00:00-03:00'),
   ('miel', 'miel', 10000, 'PYG', 10, NULL, './src/assets/models/miel.glb', NULL, '#C89535', FALSE, TRUE, TRUE, 'available', '2026-09-25T17:00:00-03:00', '2026-09-25T17:00:00-03:00'),
-  ('harina', 'harina', 10000, 'PYG', 10, NULL, NULL, NULL, '#C0A77A', FALSE, TRUE, TRUE, 'available', '2026-09-25T17:00:00-03:00', '2026-09-25T17:00:00-03:00'),
+  ('harina', 'harina', 10000, 'PYG', 10, NULL, './src/assets/models/harinaazul_tipo000.glb', NULL, '#C0A77A', FALSE, TRUE, TRUE, 'available', '2026-09-25T17:00:00-03:00', '2026-09-25T17:00:00-03:00'),
   ('petitgrain', 'petitgrain', 10000, 'PYG', 10, NULL, './src/assets/models/petitgrain.glb', NULL, '#719B65', TRUE, FALSE, TRUE, 'available', '2026-09-25T17:00:00-03:00', '2026-09-25T17:00:00-03:00'),
   ('licor', 'licor', 10000, 'PYG', 10, NULL, './src/assets/models/licor-mandioca.glb', NULL, '#AF7545', TRUE, FALSE, TRUE, 'available', '2026-09-25T17:00:00-03:00', '2026-09-25T17:00:00-03:00'),
   ('yuyo', 'yuyo', 10000, 'PYG', 10, NULL, './src/assets/models/burrito.glb', NULL, '#70864B', TRUE, FALSE, TRUE, 'available', '2026-09-25T17:00:00-03:00', '2026-09-25T17:00:00-03:00')

@@ -33,6 +33,11 @@ test('producción rechaza cada configuración débil', () => {
   for (const candidate of invalid) assert.throws(() => assertProductionConfig(candidate, 'production'));
 });
 
+test('producción configurada en nodeEnv activa la validación', () => {
+  const candidate = { nodeEnv: 'production' };
+  assert.throws(() => assertProductionConfig(candidate, candidate.nodeEnv));
+});
+
 test('producción acepta valores válidos sin revelar contraseñas en errores', () => {
   assert.doesNotThrow(() => assertProductionConfig(valid, 'production'));
   const password = 'Corta123!';

@@ -28,6 +28,7 @@ const databaseUrl = env('DATABASE_URL') || defaultDatabaseUrl;
 
 export const config = {
   root,
+  nodeEnv: env('NODE_ENV') || 'development',
   port: Number(env('PORT') || 4000),
   corsOrigin: env('CORS_ORIGIN') || '*',
   databaseUrl,

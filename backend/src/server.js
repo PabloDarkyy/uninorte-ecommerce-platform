@@ -102,7 +102,7 @@ export async function createApp(overrides = {}) {
 }
 
 async function main() {
-  assertProductionConfig(config);
+  assertProductionConfig(config, config.nodeEnv);
   const { server, store } = await createApp();
   server.listen(config.port, () => {
     console.log(`GlobalizaT backend: http://127.0.0.1:${config.port}`);
