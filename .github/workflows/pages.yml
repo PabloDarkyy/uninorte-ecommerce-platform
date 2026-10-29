@@ -30,10 +30,17 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Prepare static frontend
+        env:
+          GLOBALIZAT_API_URL: ${{ vars.GLOBALIZAT_API_URL }}
         run: |
+          if [ -z "$GLOBALIZAT_API_URL" ]; then
+            echo "::error::Define la variable de repositorio GLOBALIZAT_API_URL con la URL pública del Backend antes de desplegar."
+            exit 1
+          fi
           mkdir -p dist
           cp index.html dist/
           cp -R src dist/src
+          node -e 'const fs = require("node:fs"); const url = process.env.GLOBALIZAT_API_URL.replace(/\/+$/, ""); fs.writeFileSync("dist/api-config.js", `window.__GLOBALIZAT_API_URL__ = ${JSON.stringify(url)};\n`, "utf8"); const page = "dist/index.html"; const marker = "<script type=\"module\" src=\"./src/app.js\"></script>"; const injection = "<script src=\"./api-config.js\"></script>"; let html = fs.readFileSync(page, "utf8"); if (html.includes(marker)) html = html.replace(marker, `${injection}\n  ${marker}`); else if (html.includes("</head>")) html = html.replace("</head>", `  ${injection}\n</head>`); else { console.error("No se encontró un punto de inyección en index.html"); process.exit(1); } fs.writeFileSync(page, html, "utf8");'
           touch dist/.nojekyll
       - name: Upload frontend
         uses: actions/upload-pages-artifact@v4
